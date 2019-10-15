@@ -20,9 +20,9 @@ pip3 install darksky_weather
 
 ### Installing
 
-A step by step series of examples that tell you how to get a development env running
+Go to https://darksky.net/dev/register and enter your email adress and create a password for that site. The Darksky API allows 1000 free calls per day (one every few seconds). You don't need to give them any payment information.
 
-Say what the step will be
+Darksky will send you an email with an API code. Enter this code in api.txt
 
 ```
 Give the example
