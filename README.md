@@ -1,6 +1,6 @@
 # weatherWHAT
 
-Weather display for Pimeroni InkyWHAT, with weather data powered by Darksky. If you don't have an InkyWHAT, you can display the weather on your desktop background or screenaver.
+Weather display for Pimeroni InkyWHAT, with weather data powered by Darksky. If you don't have an InkyWHAT, you can display the weather on your desktop background or screensaver.
 
 ## Getting Started
 
