@@ -1,31 +1,31 @@
 # weatherWHAT
 
-Weather display for Pimeroni InkyWHAT, with weather data powered by Darksky. If you don't have an InkyWHAT, you can display the weather on your desktop background or screensaver.
+Weather forecast display for the Pimeroni Inky wHAT, with weather data powered by Darksky. If you don't have an Inky wHAT, you can display the weather on your desktop background or screensaver, or just as text in your terminal.
 
-## Getting Started
+## Get Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+Download the git repo. Install the 
 
 ### Prerequisites
 
-PILLOW, https://pillow.readthedocs.io/en/stable/  a fork of the Python Imaging Library (PIL). 
+[Pillow, a fork of the Python Imaging Library (PIL)](https://pillow.readthedocs.io/en/stable/)
 ```
-pip3 install PIL???
+pip install Pillow
 ```
 
-#https://github.com/Detrous/darksky
+[Python API wrapper for the DarkSky by Detrous](https://github.com/Detrous/darksky)
 ```
 pip3 install darksky_weather
 ```
 
-### Installing
+### Install
 
 Go to https://darksky.net/dev/register and enter your email adress and create a password for that site. The Darksky API allows 1000 free calls per day (one every few seconds). You don't need to give them any payment information.
 
 Darksky will send you an email with an API code. Enter this code in api.txt
 
 ```
-Give the example
+echo 1234567890abcde > api.txt
 ```
 
 
@@ -33,17 +33,19 @@ Give the example
 Example of getting some data out of the system or using it for a little demo
 
 
-## Deployment
+## Deploy
 
-You can set this script up to, for example, change your desktop backdrop. 
+You can install on a Raspberry Pi [Raspberry  Pi](https://www.raspberrypi.org/) connected to a [Inky wHAT](https://shop.pimoroni.com/products/inky-what). 
+If you don't have a suitable display, you can set this script up to, for example, change your desktop backdrop, or use the output images in your screensaver. 
 
-## Contributing
+## Contribute
 
-Please send me a message or pull request if you spot something that isn't clear or doesn't work.
+Please send a message or pull request if you spot something that isn't clear or doesn't work. Want to help? 
+* Write an installation script
 
 ## Author
 
-* **[Sean Danischevsky]** (https://danischevsky.com)
+* **[Sean Danischevsky](https://danischevsky.com)**
 
 
 ## License
@@ -52,6 +54,6 @@ This project is licensed under the GNU General Public License v3.0 - see the [LI
 
 ## Acknowledgments
 
-* Pimeroni for their wonderful products
-* Darksky for hyperlocal weather data
+* [Pimeroni](https://shop.pimoroni.com/) for their inspiring products
+* [Darksky](https://darksky.net) for hyperlocal weather data
 * Olivia and Benet for cool drawings of various types of weather
