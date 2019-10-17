@@ -17,7 +17,14 @@ pip install Pillow
 ```
 pip3 install darksky_weather
 ```
-
+If you intend to display the weather forecast on your Pimeroni Inky wHAT, attach the display to your Raspberry Pi or compatible device and install the drivers: 
+```
+sudo pip install inky
+```
+To discover weather around the world using natural text ('Paris, France'), install [geopy](https://geopy.readthedocs.io/en/stable/)
+```
+pip install geopy
+```
 ### Install
 
 Go to https://darksky.net/dev/register and enter your email adress and create a password for that site. The Darksky API allows 1000 free calls per day (one every few seconds). You don't need to give them any payment information.
@@ -42,6 +49,8 @@ If you don't have a suitable display, you can set this script up to, for example
 
 Please send a message or pull request if you spot something that isn't clear or doesn't work. Want to help? 
 * Write an installation script
+* Share your icon packages - see 'how to create an icon package' below
+
 
 ## Author
 
