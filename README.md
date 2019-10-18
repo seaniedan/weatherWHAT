@@ -35,10 +35,12 @@ cd /path/to/weatherhWHAT/
 echo '1234567890abcde' > api.txt
 ```
 
-If you have enteredTo see the weather in Paris:
+If you have installed GeoPy, to see the weather in Paris:
 ```
 weatherWHAT.py -l 'paris, france' 
 ```
+To display a map, use -m or -z (for the zooomed map):
+```weather/weatherWHAT.py -dz -l melbourne```
 
 ## Deploy
 
