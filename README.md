@@ -4,16 +4,16 @@ Weather forecast display for the Pimeroni Inky wHAT, with weather data powered b
 
 ## Get Started
 
-Download the git repo. Install the 
+Download the git repo. Install the below prerequisites. You can also [install the prerequisites using Anaconda.](anacondaInstall.md)
 
 ### Prerequisites
 
-[Pillow, a fork of the Python Imaging Library (PIL)](https://pillow.readthedocs.io/en/stable/)
+[Pillow, a fork of the Python Imaging Library (PIL)](https://pillow.readthedocs.io/en/stable/) is used to draw data on the images:
 ```
 pip install Pillow
 ```
 
-[Python API wrapper for the DarkSky by Detrous](https://github.com/Detrous/darksky)
+The [Python API wrapper for DarkSky by Detrous](https://github.com/Detrous/darksky) is used to parse the weather information:
 ```
 pip3 install darksky_weather
 ```
@@ -27,24 +27,28 @@ pip install geopy
 ```
 ### Install
 
-Go to https://darksky.net/dev/register and enter your email adress and create a password for that site. The Darksky API allows 1000 free calls per day (one every few seconds). You don't need to give them any payment information.
+[Register with Darksky](https://darksky.net/dev/register), enter your email adress and create a password. The Darksky API allows 1000 free calls per day and you don't need to give any payment information. 
 
-Darksky will send you an email with an API code. Enter this code in api.txt
-
+Darksky will send you an email with an API code. Enter this code in api.txt by replacing the path below and using the API code they sent instead of the dummy code below (keep the quotes):
 ```
-echo 1234567890abcde > api.txt
+cd /path/to/weatherhWHAT/
+echo '1234567890abcde' > api.txt
 ```
 
-
-
-Example of getting some data out of the system or using it for a little demo
-
+If you have enteredTo see the weather in Paris:
+```
+weatherWHAT.py -l 'paris, france' 
+```
 
 ## Deploy
 
 You can install on a Raspberry Pi [Raspberry  Pi](https://www.raspberrypi.org/) connected to a [Inky wHAT](https://shop.pimoroni.com/products/inky-what). 
 If you don't have a suitable display, you can set this script up to, for example, change your desktop backdrop, or use the output images in your screensaver. 
 
+e.g. On Ubuntu Mate, you can use:
+```
+crontab cron.txt
+```
 ## Contribute
 
 Please send a message or pull request if you spot something that isn't clear or doesn't work. Want to help? 
