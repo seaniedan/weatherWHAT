@@ -1,0 +1,7 @@
+a12345b12345c12345d12345e12345
+
+# your number should look like the above. 
+# Please register with Darksky - 
+# https://darksky.net/dev/register 
+# enter your email adress and create a password, 
+# copy your API key and save it in place of the above number.
