@@ -25,6 +25,10 @@ To discover weather around the world using natural text ('Paris, France'), insta
 ```
 pip install geopy
 ```
+If you want to display the images on your computer, using the -d option, Pillow may require you to install a viewer. You can use [Imagemagick](https://imagemagick.org/script/download.php): 
+```
+sudo apt-get install imagemagick
+```
 ### Install
 
 [Register with Darksky](https://darksky.net/dev/register), enter your email adress and create a password. The Darksky API allows 1000 free calls per day and you don't need to give any payment information. 
@@ -47,10 +51,14 @@ To display a map, use -m or -z (for the zooomed map):
 You can install on a Raspberry Pi [Raspberry  Pi](https://www.raspberrypi.org/) connected to a [Inky wHAT](https://shop.pimoroni.com/products/inky-what). 
 If you don't have a suitable display, you can set this script up to, for example, change your desktop backdrop, or use the output images in your screensaver. 
 
+Use the -s option and specify a file to save to (.jpg or .png). 
+
 e.g. On Ubuntu Mate, you can use:
 ```
 crontab cron.txt
 ```
+to save the image in your desktop background location.
+
 ## Contribute
 
 Please send a message or pull request if you spot something that isn't clear or doesn't work. Want to help? 
