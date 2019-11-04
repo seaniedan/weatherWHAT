@@ -1,0 +1,1 @@
+1,16,31,46 * * * * tmpfile='/tmp/weather/weather.png' && nice -n 17 /home/sean.danischevsky/pi/weather/weatherWHAT.py -b '' -s $tmpfile && nice -n 17 gsettings set org.mate.background picture-filename $tmpfile
