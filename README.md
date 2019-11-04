@@ -44,7 +44,7 @@ If you have installed GeoPy, to see the weather in Paris:
 ```
 weatherWHAT.py -l 'paris, france' 
 ```
-To display a map, use -m or -z (for the zooomed map):
+To display a map, use -m or -z (for the zoomed map):
 ```weatherWHAT.py -dz -l melbourne```
 
 ## Deploy
