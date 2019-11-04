@@ -8,16 +8,17 @@ Download the git repo. Install the below prerequisites. You can also [install th
 
 ### Prerequisites
 
+The [Python API wrapper for DarkSky by Detrous](https://github.com/Detrous/darksky) is used to parse the weather information:
+```
+pip3 install darksky_weather
+```
+
 [Pillow, a fork of the Python Imaging Library (PIL)](https://pillow.readthedocs.io/en/stable/) is used to draw data on the images:
 ```
 pip install Pillow
 ```
 
-The [Python API wrapper for DarkSky by Detrous](https://github.com/Detrous/darksky) is used to parse the weather information:
-```
-pip3 install darksky_weather
-```
-If you intend to display the weather forecast on your Pimeroni Inky wHAT, attach the display to your Raspberry Pi or compatible device and install the drivers: 
+To display the weather forecast on your Pimeroni Inky wHAT, attach the display to your Raspberry Pi or compatible device and install the drivers: 
 ```
 sudo pip install inky
 ```
@@ -44,7 +45,7 @@ If you have installed GeoPy, to see the weather in Paris:
 weatherWHAT.py -l 'paris, france' 
 ```
 To display a map, use -m or -z (for the zooomed map):
-```weather/weatherWHAT.py -dz -l melbourne```
+```weatherWHAT.py -dz -l melbourne```
 
 ## Deploy
 
