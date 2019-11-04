@@ -49,14 +49,14 @@ To display a map, use -m or -z (for the zoomed map):
 
 ## Deploy
 
-You can install on a Raspberry Pi [Raspberry  Pi](https://www.raspberrypi.org/) connected to a [Inky wHAT](https://shop.pimoroni.com/products/inky-what). 
+You can install on a [Raspberry Pi](https://www.raspberrypi.org/) connected to a [Inky wHAT](https://shop.pimoroni.com/products/inky-what). 
 If you don't have a suitable display, you can set this script up to, for example, change your desktop backdrop, or use the output images in your screensaver. 
 
 Use the -s option and specify a file to save to (.jpg or .png). 
 
-e.g. On Ubuntu Mate, you can use:
+e.g. On Ubuntu Mate, to update your desktop background, you can use:
 ```
-crontab cron.txt
+crontab examples/mate_desktop_cron.txt
 ```
 to save the image in your desktop background location.
 
