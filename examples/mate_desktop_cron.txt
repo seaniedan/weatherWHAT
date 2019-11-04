@@ -1,1 +1,11 @@
-1,16,31,46 * * * * tmpfile='/tmp/weather/weather.png' && nice -n 17 /home/sean.danischevsky/pi/weather/weatherWHAT.py -b '' -s $tmpfile && nice -n 17 gsettings set org.mate.background picture-filename $tmpfile
+# Use this crontab file to update your desktop background on Ubuntu Mate.
+# You may need to add the /full/path/to/weatherWHAT.py in the below lines:
+# In a terminal, type:
+#
+# mkdir -p /tmp/weather 
+# tmpfile='/tmp/weather/weather.png' && nice -n 17 weatherWHAT.py -s $tmpfile && nice -n 17 gsettings set org.mate.background picture-filename $tmpfile
+# crontab examples/mate_desktop_cron.txt
+#
+# Change your desktop to use /tmp/weather/weather.png as the backdrop.
+
+1,16,31,46 * * * * tmpfile='/tmp/weather/weather.png' && nice -n 17 weatherWHAT.py -s $tmpfile && nice -n 17 gsettings set org.mate.background picture-filename $tmpfile
