@@ -1,10 +1,7 @@
-#inky repository
-/inky/
-
-#weather specific
+# Darksky API key
 api.txt
 
-#image outputs
+# output images
 */outputs/*
 
 
