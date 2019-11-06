@@ -1,0 +1,4 @@
+MAILTO=sean@seandanischevsky.com
+
+#1,16,31,46 * * * * nice -n 19 /home/pi/pi/weather/weatherWHAT.py -i -sf /home/pi/pi/weather/saved_weather/sequence1
+1,16,31,46 * * * * nice -n 19 /home/pi/pi/weather/weatherWHAT.py -b '' -c 'yellow' -i -sf /home/pi/pi/weather/saved_weather/sequence1

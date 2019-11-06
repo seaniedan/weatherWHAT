@@ -102,14 +102,14 @@ if __name__ == "__main__":
     output_dirpath= os.path.join(os.path.dirname(__file__),'outputs/sequence1')
     output_file_prefix= 'test' #optional, default ''
     startframe= 1001 #optional start frame, default-1001
-
-
-    for frame, file in enumerate(sorted(os.listdir(input_dirpath))):
+    files= sorted(os.listdir(input_dirpath))
+    files=[file for file in files if not file.startswith('.')]
+    for frame, file in enumerate(files):
         #forecast= weatherWHAT.getweather(blah, Display save etc)
         input_filename= os.path.join(input_dirpath, file)
+        print (input_filename)
         output_basename= '{}{}.png'.format(output_file_prefix, startframe+ frame)
         output_filename= os.path.join(output_dirpath, output_basename)
-        #print (output_filename)
         try:
             weatherWHAT.display_weather(
                 zoom= args.zoom,
