@@ -2,6 +2,8 @@
 
 Weather forecast display for the Pimeroni Inky wHAT, with weather data powered by Darksky. If you don't have an Inky wHAT, you can display the weather on your desktop background or screensaver, or just as text in your terminal.
 
+[[images/color_moon.png]]
+
 ## Get Started
 
 Download the git repo. Install the below prerequisites. You can also [install the prerequisites using Anaconda.](anacondaInstall.md)
