@@ -450,7 +450,7 @@ if __name__ == "__main__":
 
     if args.latlong:
         latlong= args.latlong
-        if verbose: 
+        if args.verbose: 
             print ('Latitude, Longitude:', latlong)
         latlong= latlong.split(',')
         latlong= [float(l) for l in latlong]
