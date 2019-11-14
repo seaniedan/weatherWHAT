@@ -88,6 +88,8 @@ def get_old_weather(latlong, time):
     from darksky.api import DarkSky, DarkSkyAsync
     from darksky.types import languages, units, weather
 
+    API_KEY= get_API_from_file()
+
     # Synchronous way
     darksky= DarkSky(API_KEY)
     #print (latlong)
