@@ -375,7 +375,7 @@ def temperature_font_loader(size):
 
 
 
-def setup_inky():
+def setup_inky(inky_colour):
     from inky import InkyWHAT
 
     inky_display= InkyWHAT(inky_colour)
@@ -793,7 +793,7 @@ def main(forecast,
 
     # Set up the correct display and scaling factors
     try:
-        w, h, ink_black, ink_color= setup_inky()
+        w, h, ink_black, ink_color= setup_inky(inky_colour)
     except:
         #go_to_screen= True# ...get screen size?
         w, h, ink_black, ink_color= setup_screen()
