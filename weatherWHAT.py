@@ -205,14 +205,6 @@ def display_weather(
 
     summary= forecast.hourly.summary
 
-    #show soonest alert
-    alerts= forecast.alerts
-    if alerts:
-        min_alert= min(alerts, key= lambda x: x.time)
-        alert= "{}: {}".format(min_alert.time.strftime("%A %H:%M"), min_alert.title)
-        #alerts+= "\n".join(alert for alert in set(forecast_alert_titles))
-    else:
-        alert= None
     
 
     #daily[0] = TODAY
@@ -225,14 +217,22 @@ def display_weather(
     update_msg= "\n".join((banner, location_banner, forecast.currently.time.strftime("%A %d %b %Y")))
 
 
+    #hi/lo 
+
     if (low.time < high.time) and low.time- forecast.currently.time > datetime.timedelta(hours= 1):# and (low.time- forecast.currently.time).seconds > datetime.timedelta(hours= 1).seconds: 
         high_next= False 
-        hi_lo_msg= "lo({}) @ {}".format(str(round(low.temperature))+ "°", low.time.strftime("%H:%M"))       
+        hi_lo_msg= "low({}) @ {}".format(str(round(low.temperature))+ "°", low.time.strftime("%H:%M"))       
 
     else:
         #high time is next 
         high_next= True
-        hi_lo_msg= "hi({}) @ {}".format(str(round(high.temperature))+ "°", high.time.strftime("%H:%M"))  
+        hi_lo_msg= "high({}) @ {}".format(str(round(high.temperature))+ "°", high.time.strftime("%H:%M"))  
+
+
+
+
+
+
 
     #sunrise/sunset time
     try:
@@ -241,6 +241,7 @@ def display_weather(
             sun_msg= "sunset @ {}".format(sunset_time.strftime("%H:%M"))
             summary= forecast.hourly.summary.rstrip(".")
         else:
+            # night time
             sun_msg= "sunrise @ {}".format(sunrise_time.strftime("%H:%M"))
             summary= forecast.daily.summary.rstrip(".")
     except:
@@ -248,6 +249,16 @@ def display_weather(
         sun_msg= ""
         summary= forecast.hourly.summary.rstrip(".")
 
+
+
+    #show soonest alert
+    alerts= forecast.alerts
+    if alerts:
+        min_alert= min(alerts, key= lambda x: x.time)
+        alert= "{}: {}".format(min_alert.time.strftime("%A %H:%M"), min_alert.title)
+        #alerts+= "\n".join(alert for alert in set(forecast_alert_titles))
+    else:
+        alert= None
 
     #format for screen
     if alert:

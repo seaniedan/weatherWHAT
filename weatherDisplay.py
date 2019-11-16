@@ -734,41 +734,39 @@ def main(forecast,
 
 
 
-
+    #hi/lo 
 
     if (low.time < high.time) and low.time- forecast.currently.time > datetime.timedelta(hours= 1):# and (low.time- forecast.currently.time).seconds > datetime.timedelta(hours= 1).seconds: 
         high_next= False 
-        hi_lo_msg= "lo({}) @ {}".format(str(round(low.temperature))+ "°", low.time.strftime("%H:%M"))       
+        hi_lo_msg= "low {}°\n{}".format(str(round(low.temperature)), low.time.strftime("%H:%M"))
 
     else:
         #high time is next 
         high_next= True
-        hi_lo_msg= "hi({}) @ {}".format(str(round(high.temperature))+ "°", high.time.strftime("%H:%M"))  
+        hi_lo_msg= "high {}°\n{}".format(str(round(high.temperature)), high.time.strftime("%H:%M"))    
 
    
 
 
 
 
-    #next high or low
-    if high_next:     
-        hi_lo_msg= "high {}°\n{}".format(str(round(high.temperature)), high.time.strftime("%H:%M"))    
-    else:
-        hi_lo_msg= "low {}°\n{}".format(str(round(low.temperature)), low.time.strftime("%H:%M"))
 
     #sunrise/sunset time
     try:
         if (sunrise_time < forecast.currently.time < sunset_time):
+            #it's day time            
             sun_msg= "sunset\n{}".format(sunset_time.strftime("%H:%M"))
+            summary= forecast.hourly.summary.rstrip(".")
+
         else:
+            # night time
             sun_msg= "sunrise\n{}".format(sunrise_time.strftime("%H:%M"))
+            summary= forecast.daily.summary.rstrip(".")
     except:
         #We're at the North pole and there's no sunset
         sun_msg= ""
+        summary= forecast.hourly.summary.rstrip(".")
 
-
-    #summary
-    summary= forecast.hourly.summary.rstrip(".")
 
 
     #replace summary with soonest alert
