@@ -6,7 +6,7 @@ Weather forecast display for the Pimeroni Inky wHAT, with weather data powered b
 
 ## Get Started
 
-Download the git repo. Install the below prerequisites. You can also [install the prerequisites using Anaconda.](anacondaInstall.md)
+Download the git repo. Install the below prerequisites. You can also [install the prerequisites using Anaconda.](./docs/anacondaInstall.md)
 
 ### Prerequisites
 
