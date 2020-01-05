@@ -10,6 +10,11 @@ Download the git repo. Install the below prerequisites. You can also [install th
 
 ### Prerequisites
 
+If you don't have pip3 (for example if using raspbian-lite), you'll first need to install it:
+```
+sudo apt-get update
+sudo apt install python3-pip
+```
 The [Python API wrapper for DarkSky by Detrous](https://github.com/Detrous/darksky) is used to parse the weather information:
 ```
 pip3 install darksky_weather
