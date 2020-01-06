@@ -6,29 +6,25 @@ Weather forecast display for the Pimeroni Inky wHAT, with weather data powered b
 
 ## Get Started
 
-Download the git repo. Install the below prerequisites. You can also [install the prerequisites using Anaconda.](anacondaInstall.md)
+Download the git repo:
+```
+sudo apt install git
+git clone https://github.com/seaniedan/weatherWHAT.git
+```
+
+Install the below prerequisites. You can also [install the prerequisites using Anaconda.](./docs/anacondaInstall.md)
 
 ### Prerequisites
 
-The [Python API wrapper for DarkSky by Detrous](https://github.com/Detrous/darksky) is used to parse the weather information:
-```
-pip3 install darksky_weather
-```
+First, [install, connect and test your InkyWHAT](https://github.com/pimoroni/inky)
 
-[Pillow, a fork of the Python Imaging Library (PIL)](https://pillow.readthedocs.io/en/stable/) is used to draw data on the images:
-```
-pip install Pillow
-```
+If you are installing using [Raspbian-lite on a Pi Zero, and need some help with that, follow these instructions.](./docs/raspbian-lite.md)
 
-To display the weather forecast on your Pimeroni Inky wHAT, attach the display to your Raspberry Pi or compatible device and install the drivers: 
-```
-sudo pip install inky
-```
 To discover weather around the world using natural text ('Paris, France'), install [geopy](https://geopy.readthedocs.io/en/stable/)
 ```
-pip install geopy
+pip3 install geopy
 ```
-If you want to display the images on your computer, using the -d option, Pillow may require you to install a viewer. You can use [Imagemagick](https://imagemagick.org/script/download.php): 
+If you want to display the images on your computer, using the -d option, Pillow requires a viewer. Install [Imagemagick](https://imagemagick.org/script/download.php): 
 ```
 sudo apt-get install imagemagick
 ```
