@@ -16,9 +16,9 @@ Install the below prerequisites. You can also [install the prerequisites using A
 
 ### Prerequisites
 
-First, install and connect your InkyWHAT, using the instructions at ...
+First, [install, connect and test your InkyWHAT](https://github.com/pimoroni/inky)
 
-If you are installing using Raspbian-lite on a Pi Zero, and need some help with that, follow these instructions.
+If you are installing using [Raspbian-lite on a Pi Zero, and need some help with that, follow these instructions.](./docs/raspbian-lite.md)
 
 To discover weather around the world using natural text ('Paris, France'), install [geopy](https://geopy.readthedocs.io/en/stable/)
 ```
