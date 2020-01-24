@@ -16,18 +16,12 @@ Install the below prerequisites. You can also [install the prerequisites using A
 
 ### Prerequisites
 
-First, [install, connect and test your InkyWHAT](https://github.com/pimoroni/inky)
+First, [install, connect and test your InkyWHAT.](https://github.com/pimoroni/inky)
 
-If you are installing using [Raspbian-lite on a Pi Zero, and need some help with that, follow these instructions.](./docs/raspbian-lite.md)
+If you are installing using [Raspbian-lite, follow these steps.](./docs/raspbian-lite.md)
 
-To discover weather around the world using natural text ('Paris, France'), install [geopy](https://geopy.readthedocs.io/en/stable/)
-```
-pip3 install geopy
-```
-If you want to display the images on your computer, using the -d option, Pillow requires a viewer. Install [Imagemagick](https://imagemagick.org/script/download.php): 
-```
-sudo apt-get install imagemagick
-```
+Then install [the rest of the prerequisites.](./docs/prerequisites.md)
+
 ### Install
 
 [Register with Darksky](https://darksky.net/dev/register), enter your email adress and create a password. The Darksky API allows 1000 free calls per day and you don't need to give any payment information. 
