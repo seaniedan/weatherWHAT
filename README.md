@@ -12,15 +12,20 @@ sudo apt install git
 git clone https://github.com/seaniedan/weatherWHAT.git
 ```
 
-Install the below prerequisites. You can also [install the prerequisites using Anaconda.](./docs/anacondaInstall.md)
-
 ### Prerequisites
 
-First, [install, connect and test your InkyWHAT.](https://github.com/pimoroni/inky)
+If you are using Raspbian-lite, [install pip3.](./docs/raspbian-lite.md)
 
-If you are installing using [Raspbian-lite, follow these steps.](./docs/raspbian-lite.md)
+The [Python API wrapper for DarkSky by Detrous](https://github.com/Detrous/darksky) is used to parse the weather information:
+```
+pip3 install darksky_weather
+```
 
-Then install [the rest of the prerequisites.](./docs/prerequisites.md)
+If you have one, [install, connect and test your InkyWHAT.](https://github.com/pimoroni/inky)
+
+If you want to show images, and use the location functions, install [the rest of the prerequisites.](./docs/prerequisites.md)
+
+You can also [install the additional prerequisites using Anaconda.](./docs/anacondaInstall.md)
 
 ### Install
 
@@ -41,7 +46,7 @@ To display a map, use -m or -z (for the zoomed map):
 
 ## Deploy
 
-You can install on a [Raspberry Pi](https://www.raspberrypi.org/) connected to a [Inky wHAT](https://shop.pimoroni.com/products/inky-what). 
+You can use a [Raspberry Pi](https://www.raspberrypi.org/) connected to a [Inky wHAT](https://shop.pimoroni.com/products/inky-what). 
 If you don't have a suitable display, you can set this script up to, for example, change your desktop backdrop, or use the output images in your screensaver. 
 
 Use the -s option and specify a file to save to (.jpg or .png). 
@@ -54,9 +59,13 @@ to save the image in your desktop background location.
 
 ## Contribute
 
-Please send a message or pull request if you spot something that isn't clear or doesn't work. Want to help? 
-* Write an installation script
-* Share your icon packages - see 'how to create an icon package' below
+Please send a message or pull request if something isn't clear or doesn't work. 
+
+Want to help? 
+* Write an installation script.
+* Share ideas.
+* Rewrite it to work on different resolution screens.
+* Share your icon packages - see 'how to create an icon package' below.
 
 
 ## Author
