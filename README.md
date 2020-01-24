@@ -37,14 +37,25 @@ cd /path/to/weatherhWHAT/
 echo '1234567890abcde' > api.txt
 ```
 
+## Deploy
+
+To show the weather on the command line:
+```
+weatherWHAT.py
+```
+
+If you have installed the prerequisites to display an image:
+```
+weatherWHAT.py -d
+```
+
 If you have installed GeoPy, to see the weather in Paris:
 ```
 weatherWHAT.py -l 'paris, france' 
 ```
-To display a map, use -m or -z (for the zoomed map):
+To display a map, use -m (or -z for the zoomed map):
 ```weatherWHAT.py -dz -l melbourne```
 
-## Deploy
 
 You can use a [Raspberry Pi](https://www.raspberrypi.org/) connected to a [Inky wHAT](https://shop.pimoroni.com/products/inky-what). 
 If you don't have a suitable display, you can set this script up to, for example, change your desktop backdrop, or use the output images in your screensaver. 
