@@ -58,6 +58,11 @@ weatherWHAT.py -l 'paris, france'
 To display a map, use -m (or -z for the zoomed map):
 ```weatherWHAT.py -dz -l melbourne```
 
+To display a particular image or folder of images, use the -bg option. You'll also need -d to display the image onscreen, or -i to send to the InkyWHAT.
+```./weatherWHAT.py -bg icons/kids -d```
+
+Use the -h option for help!
+
 
 You can use a [Raspberry Pi](https://www.raspberrypi.org/) connected to a [Inky wHAT](https://shop.pimoroni.com/products/inky-what). 
 If you don't have a suitable display, you can set this script up to, for example, change your desktop backdrop, or use the output images in your screensaver. 
@@ -76,7 +81,7 @@ Please send a message or pull request if something isn't clear or doesn't work.
 
 Want to help? 
 * Write an installation script.
-* Share ideas.
+* Share ideas, and folders of background images.
 * Rewrite it to work on different resolution screens.
 * Share your icon packages - see 'how to create an icon package' below.
 
