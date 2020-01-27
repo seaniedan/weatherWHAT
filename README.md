@@ -1,6 +1,6 @@
 # weatherWHAT
 
-Weather forecast display for the Pimeroni Inky wHAT, with weather data powered by Darksky. If you don't have an Inky wHAT, you can display the weather on your desktop background or screensaver, or just as text in your terminal.
+Weather forecast display for the Pimeroni Inky wHAT, with weather data powered by Dark Sky. If you don't have an Inky wHAT, you can display the weather on your desktop background or screensaver, or just as text in your terminal.
 
 ![display example](./docs/images/color_moon.png)
 
@@ -16,7 +16,7 @@ git clone --depth=1 https://github.com/seaniedan/weatherWHAT.git
 
 If you are using Raspbian-lite, [install pip3.](./docs/raspbian-lite.md)
 
-The [Python API wrapper for DarkSky by Detrous](https://github.com/Detrous/darksky) is used to parse the weather information:
+The [Python API wrapper for Dark Sky by Detrous](https://github.com/Detrous/darksky) is used to parse the weather information:
 ```
 pip3 install darksky_weather
 ```
@@ -29,9 +29,9 @@ You can also [install the additional prerequisites using Anaconda.](./docs/anaco
 
 ### Install
 
-[Register with Darksky](https://darksky.net/dev/register), enter your email adress and create a password. The Darksky API allows 1000 free calls per day and you don't need to give any payment information. 
+[Register with Dark Sky](https://darksky.net/dev/register), enter your email adress and create a password. The Dark Sky API allows 1000 free calls per day and you don't need to give any payment information. 
 
-Darksky will send you an email with an API code. Enter this code in api.txt by replacing the path below and using the API code they sent instead of the dummy code below (keep the quotes):
+Dark Sky will send you an email with an API code. Enter this code in api.txt by replacing the path below and using the API code they sent instead of the dummy code below (keep the quotes):
 ```
 cd /path/to/weatherhWHAT/
 echo '1234567890abcde' > api.txt
