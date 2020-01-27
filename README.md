@@ -41,25 +41,30 @@ echo '1234567890abcde' > api.txt
 
 To show the weather on the command line:
 ```
-weatherWHAT.py
+./weatherWHAT.py
 ```
 
 If you have installed the prerequisites to display an image:
 ```
-weatherWHAT.py -d
+./weatherWHAT.py -d
 ```
 
 The numbers at the bpottom of the screen are hours: yellow means sunshine (high UV). Bars appearing above the numbers show the amount of rain at that hour.
 
 If you have installed GeoPy, to see the weather in Paris:
 ```
-weatherWHAT.py -l 'paris, france' 
+./weatherWHAT.py -l 'paris, france' 
 ```
+
 To display a map, use -m (or -z for the zoomed map):
-```weatherWHAT.py -dz -l melbourne```
+```
+./weatherWHAT.py -dz -l melbourne
+```
 
 To display a particular image or folder of images, use the -bg option. You'll also need -d to display the image onscreen, or -i to send to the InkyWHAT.
-```./weatherWHAT.py -bg icons/kids -d```
+```
+./weatherWHAT.py -bg icons/kids -d
+```
 
 Use the -h option for help!
 
