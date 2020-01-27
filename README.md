@@ -93,7 +93,7 @@ Want to help?
 
 ## Author
 
-* **[Sean Danischevsky](https://danischevsky.com)**
+* **[Sean Danischevsky](https://www.danischevsky.com)**
 
 
 ## License
