@@ -21,7 +21,7 @@ The [Python API wrapper for Dark Sky by Detrous](https://github.com/Detrous/dark
 pip3 install darksky_weather
 ```
 
-If you have one, [install, connect and test your InkyWHAT.](https://github.com/pimoroni/inky)
+If you have one, [install, connect and test your Inky wHAT.](https://github.com/pimoroni/inky)
 
 If you want to show images, and use the location functions, install [the rest of the prerequisites.](./docs/prerequisites.md)
 
