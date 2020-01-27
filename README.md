@@ -49,6 +49,8 @@ If you have installed the prerequisites to display an image:
 weatherWHAT.py -d
 ```
 
+The numbers at the bpottom of the screen are hours: yellow means sunshine (high UV). Bars appearing above the numbers show the amount of rain at that hour.
+
 If you have installed GeoPy, to see the weather in Paris:
 ```
 weatherWHAT.py -l 'paris, france' 
@@ -62,7 +64,7 @@ If you don't have a suitable display, you can set this script up to, for example
 
 Use the -s option and specify a file to save to (.jpg or .png). 
 
-e.g. On Ubuntu Mate, to update your desktop background, you can use:
+e.g. On Ubuntu Mate, to update your desktop background, you can use the instructions in this file:
 ```
 crontab examples/mate_desktop_cron.txt
 ```
@@ -90,6 +92,7 @@ This project is licensed under the GNU General Public License v3.0 - see the [LI
 
 ## Acknowledgments
 
-* [Pimeroni](https://shop.pimoroni.com/) for their inspiring products
-* [Darksky](https://darksky.net) for hyperlocal weather data
+* [Raspberry Pi](https://www.raspberrypi.org) for a great device
+* [Pimeroni](https://shop.pimoroni.com) for their inspiring products
+* [Dark Sky](https://darksky.net) for hyperlocal weather data
 * Olivia and Benet for cool drawings of various types of weather
