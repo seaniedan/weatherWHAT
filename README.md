@@ -105,4 +105,5 @@ This project is licensed under the GNU General Public License v3.0 - see the [LI
 * [Raspberry Pi](https://www.raspberrypi.org) for a great device
 * [Pimeroni](https://shop.pimoroni.com) for their inspiring products
 * [Dark Sky](https://darksky.net) for hyperlocal weather data
+* Lee at 90 Degrees Picture Framing, 124 Fortess Rd, Tufnell Park, London NW5 2HP (+44 20 7267 4121) for the super frame
 * Olivia and Benet for cool drawings of various types of weather
