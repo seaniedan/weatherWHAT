@@ -1,1 +1,9 @@
-
+matplotlib>=3.1.1
+numpy>=1.16.5
+darksky_weather>=1.3.1
+geopy>=1.20.0
+darksky>=0.3
+font_hanken_grotesk>=0.0.2
+font_source_sans_pro>=0.0.1
+inky>=0.0.5
+Pillow>=7.0.0
