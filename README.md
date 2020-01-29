@@ -33,7 +33,7 @@ You can also [install the additional prerequisites using Anaconda.](./docs/anaco
 
 Dark Sky will send you an email with an API code. Enter this code in api.txt by replacing the path below and using the API code they sent instead of the dummy code below (keep the quotes):
 ```
-cd /path/to/weatherhWHAT/
+cd weatherWHAT/
 echo '1234567890abcde' > api.txt
 ```
 
