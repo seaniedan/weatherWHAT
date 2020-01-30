@@ -6,8 +6,9 @@ Weather forecast display for the Pimeroni Inky wHAT, with weather data powered b
 
 ## Get Started
 
-Download the git repo:
+Download the git repo (if using Docker, you don't need to type 'sudo'):
 ```
+sudo apt-get update
 sudo apt install git
 git clone --depth=1 https://github.com/seaniedan/weatherWHAT.git
 ```
