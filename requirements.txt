@@ -1,6 +1,6 @@
 matplotlib>=3.1.1
 numpy>=1.16.5
-darksky_weather>=1.3.1
+darksky_weather==1.7.0
 geopy>=1.20.0
 darksky>=0.3
 font_hanken_grotesk>=0.0.2
