@@ -75,7 +75,7 @@ def get_weather(latlong= latlong):
         latitude, longitude,
         extend= False, # default `False`
         lang= languages.ENGLISH, # default `ENGLISH`
-        values_units= units.AUTO, # default auto
+        #values_units= units.AUTO, # default auto
         exclude= [weather.MINUTELY],# weather.ALERTS] - default []
     )
     return forecast
@@ -99,7 +99,7 @@ def get_old_weather(latlong, time):
         time,
         extend= False, # default `False`
         lang= languages.ENGLISH, # default `ENGLISH`
-        values_units= units.AUTO, # default `auto`
+        #values_units= units.AUTO, # default `auto`
         exclude= [weather.MINUTELY]#, weather.ALERTS] # default `[]`
     )
     return forecast    
