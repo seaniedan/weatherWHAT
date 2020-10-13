@@ -4,7 +4,7 @@ Weather forecast display for the Pimeroni Inky wHAT, with weather data powered b
 
 ![display example](./docs/images/color_moon.png)
 
-## ALERT: [Dark Sky, the provider on which this repo relies, will no longer accept new signups. The API will continue to function through the end of 2021.](https://blog.darksky.net/dark-sky-has-a-new-home)
+## ALERT: [Dark Sky, the provider on which this repo relies, no longer accept new signups. The API will continue to function through the end of 2021.](https://blog.darksky.net/dark-sky-has-a-new-home)
 
 ## Get Started
 
