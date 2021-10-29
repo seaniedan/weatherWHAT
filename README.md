@@ -4,7 +4,7 @@ Weather forecast display for the Pimeroni Inky wHAT, with weather data powered b
 
 ![display example](./docs/images/color_moon.png)
 
-## ALERT: [Dark Sky, the provider on which this repo relies, no longer accept new signups. The API will continue to function through the end of 2022.](https://blog.darksky.net/) If you would like to help, please fork this repo, re-write it for a different free service, like OpenWeatherMap(https://openweathermap.org/api) and create a pull request! I'd appreciate it and will merge it back!
+## ALERT: [Dark Sky, the provider on which this repo relies, no longer accept new signups. The API will continue to function through the end of 2022.](https://blog.darksky.net/) If you would like to help, please fork this repo, re-write it for a different free service, like [OpenWeatherMap](https://openweathermap.org/api) and create a pull request! I'd appreciate it and will merge it back!
 
 ## Get Started
 
