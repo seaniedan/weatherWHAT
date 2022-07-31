@@ -3,7 +3,8 @@
 
 
 #put this in a separate file/def:
-from PIL import Image, ImageFont, ImageDraw, ImageOps, ImageFilter, ImageEnhance
+from PIL import Image, ImageFont, ImageDraw, ImageFilter
+#from PIL import ImageOps, ImageEnhance
 
 
 def mean_of_area(img, x0, y0, x1, y1):
@@ -272,16 +273,11 @@ def inky_dither_sean(img):
         distances-= min(distances)
         distances/= max(distances)
 
-        #distances=[i-min(distances) for i in distances]
-        #distances=[i/float(max(distances)) for i in distances]
-
         #reverse
         distances=[1- i  for i in distances]
         buckets= 3
         my_list = [colors[0]]* math.floor(distances[0]* buckets)+ [colors[1]]* math.floor(distances[1]* buckets)+ [colors[2]]* math.floor(distances[2]*buckets)
                
-        #index_of_smallest= np.where(distances== np.amin(distances))
-        #smallest_distance= colors[index_of_smallest]
         return random.choice(my_list)
 
 
@@ -330,16 +326,12 @@ def summary_font_loader(size):
         from font_source_sans_pro import SourceSansProSemibold
         font= ImageFont.truetype(SourceSansProSemibold, size)
     except:
-        #print(2)
         try:
-            #print(3)
             font= ImageFont.truetype("arial.ttf", size)
         except: 
             try:
-                #print(4)
                 font= ImageFont.truetype(os.path.join(os.path.dirname(__file__), 'fonts', 'SourceSansPro-Semibold.ttf'), size)
             except:
-                #print(5)
                 font= ImageFont.load_default()
     return font
 
@@ -356,20 +348,15 @@ def temperature_font_loader(size):
     import os
 
     try:
-        #print('t1')
         from font_hanken_grotesk import HankenGroteskBold#, HankenGroteskMedium
         font= ImageFont.truetype(HankenGroteskBold, size)
     except:
-        #print('t2')
         try:
-            #print('t3')
             font= ImageFont.truetype("arial.ttf", size)
         except: 
             try:
-                #print('t4')
                 font= ImageFont.truetype(os.path.join(os.path.dirname(__file__), 'fonts','SourceSansPro-Semibold.ttf'), size)
             except:
-                #print('t5')
                 font= ImageFont.load_default()
     return font
 

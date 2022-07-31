@@ -1,5 +1,5 @@
-# Darksky API key
-api.txt
+# personal API key, location and data
+api.py
 
 # output images
 */outputs/*
@@ -125,3 +125,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# Visual Studio Code
+.vscode/

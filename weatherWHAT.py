@@ -9,12 +9,10 @@
 
 
 #default preferences
-units= 'uk2'
 latlong= (51.5515, -0.1344) # default location for weather forecast. Get this by copying from Google Maps URL.
 
 #imports
-import argparse
-        
+import argparse        
 
 
 
@@ -54,55 +52,9 @@ def get_API_from_file():
         API_KEY= read_line(api_path)
         return API_KEY
     except:
-        print ("Please register with Darksky - https://darksky.net/dev/register - enter your email adress and create a password, copy your API key and save it in a file next to this one, called\napi.txt")
+        print ("Please register with The Meteorological Office, https://metoffice.apiconnect.ibmcloud.com/metoffice/production/ - enter your email adress and create a password, copy your API key and save it in a file next to this one, called\napi.txt")
         raise Exception
 
-
-
-
-
-def get_weather(latlong= latlong):
-    from darksky.api import DarkSky, DarkSkyAsync
-    from darksky.types import languages, units, weather
-
-    API_KEY= get_API_from_file()
-
-    # Synchronous way
-    darksky= DarkSky(API_KEY)
-    #print (latlong)
-    latitude, longitude= latlong#[:]
-    forecast= darksky.get_forecast(
-        latitude, longitude,
-        extend= False, # default `False`
-        lang= languages.ENGLISH, # default `ENGLISH`
-        #values_units= units.AUTO, # default auto
-        exclude= [weather.MINUTELY],# weather.ALERTS] - default []
-    )
-    return forecast
-    
-
-
-def get_old_weather(latlong, time):
-    #latlong = (float,float)
-    #time = a datetime object
-    from darksky.api import DarkSky, DarkSkyAsync
-    from darksky.types import languages, units, weather
-
-    API_KEY= get_API_from_file()
-
-    # Synchronous way
-    darksky= DarkSky(API_KEY)
-    #print (latlong)
-    latitude, longitude= latlong#[:]
-    forecast= darksky.get_time_machine_forecast(
-        latitude, longitude,
-        time,
-        extend= False, # default `False`
-        lang= languages.ENGLISH, # default `ENGLISH`
-        #values_units= units.AUTO, # default `auto`
-        exclude= [weather.MINUTELY]#, weather.ALERTS] # default `[]`
-    )
-    return forecast    
 
 
 
@@ -146,7 +98,7 @@ def save_forecast(forecast, saveforecast):
 
 #run on command line:
 def display_weather(
-    latlong= (51.5515, -0.1344), 
+    latlong= latlong, 
     bg_file= None,
     bg_map= False, 
     zoom= False,
@@ -157,7 +109,7 @@ def display_weather(
     loadforecast= None,
     saveforecast= None,
     old= False,
-    banner= 'Powered by Dark Sky',
+    banner= '',
     location_banner='',
     verbose= False):
 
@@ -167,14 +119,13 @@ def display_weather(
     # show_on_inky: display image on Pimeroni InkyWHAT
     # show_image: display image on screen
     # save_image: filepath to save resulting image
-    # loadforecast: load forecast data from filepath instead of getting forecast from darksky
+    # loadforecast: load forecast data from filepath instead of getting live forecast
     # saveforecast: filepath to save the forecast in a pickle file
     # old: if True, get historical wather forecast
     # banner: message to display
     # verbose: if True, display diagnostic info
 
-    import os
-    import time
+    import met_weather
     import datetime
 
     #load or save pickled forecasts
@@ -184,32 +135,49 @@ def display_weather(
         # datetime(year, month, day, hour, minute, second, microsecond)
         forecast= get_old_weather(latlong, old) #old must be a datetime object
     else:
-        forecast= get_weather(latlong)
+        forecast= met_weather.get_forecast(latlong)
+
+
 
     if saveforecast:
         #save weather and reload it to check
         forecast= save_forecast(forecast, saveforecast)
     
-        
 
 
+    # Parse data for text display
+    # high and low temperatures in the next 24 hours:
 
-   # Parse data for text display
-
-    #don't use temperature_high_time= forecast.daily.data[0].temperature_high_time
-    #because high for the next day would appear after midnight
-    #and I wanted to see the low at 7am (or whenever it was still coming)
-    high= max(forecast.hourly.data[:24], key= lambda x: x.temperature)
+    # data[0] = today, but I don't use
+    # temperature_high_time= forecast.daily.data[0].temperature_high_time
+    # because high for the next day would appear after midnight
+    # and I wanted to see the low at 7am (or whenever it was still coming)
+    high= met_weather.high(forecast)
     low= min(forecast.hourly.data[:24], key= lambda x: x.temperature)
 
-
+    #short text forecast summary
     summary= forecast.hourly.summary
 
-    
-
-    #daily[0] = TODAY
+    # next sunrise and sunset times
     sunrise_time= forecast.daily.data[0].sunrise_time
     sunset_time= forecast.daily.data[0].sunset_time
+
+    # get soonest alert
+    alerts= forecast.alerts
+    if alerts:
+        min_alert= min(alerts, key= lambda x: x.time)
+        alert= "{}: {}".format(min_alert.time.strftime("%A %H:%M"), min_alert.title)
+        #alerts+= "\n".join(alert for alert in set(forecast_alert_titles))
+    else:
+        alert= None
+
+
+
+
+
+
+
+
 
 
     #choose and format data for text
@@ -218,7 +186,6 @@ def display_weather(
 
 
     #hi/lo 
-
     if (low.time < high.time) and low.time- forecast.currently.time > datetime.timedelta(hours= 1):# and (low.time- forecast.currently.time).seconds > datetime.timedelta(hours= 1).seconds: 
         high_next= False 
         hi_lo_msg= "low({}) @ {}".format(str(round(low.temperature))+ "°", low.time.strftime("%H:%M"))       
@@ -227,10 +194,6 @@ def display_weather(
         #high time is next 
         high_next= True
         hi_lo_msg= "high({}) @ {}".format(str(round(high.temperature))+ "°", high.time.strftime("%H:%M"))  
-
-
-
-
 
 
 
@@ -251,18 +214,11 @@ def display_weather(
 
 
 
-    #show soonest alert
-    alerts= forecast.alerts
-    if alerts:
-        min_alert= min(alerts, key= lambda x: x.time)
-        alert= "{}: {}".format(min_alert.time.strftime("%A %H:%M"), min_alert.title)
-        #alerts+= "\n".join(alert for alert in set(forecast_alert_titles))
-    else:
-        alert= None
 
-    #format for screen
+
+    #switch summary for alert if there is one
     if alert:
-        summary= alert # [Alert]. Can be found at darksky/forecast.py    
+        summary= alert  
 
 
     #here is where you could do a check to see if the screen needs updating-
@@ -300,7 +256,7 @@ def display_weather(
         print ("sunrise time:", sunrise_time.strftime("%A %d %b %Y %H:%M")) 
         print ("sunset time:", sunset_time.strftime("%A %d %b %Y %H:%M"))     
         for alert in alerts:
-            print("ALERT! {}: {}".format(alert.time.strftime("%A %H:%M"), alert.title)) # [Alert]. Can be found at darksky/forecast.py
+            print("ALERT! {}: {}".format(alert.time.strftime("%A %H:%M"), alert.title))
 
 
 
@@ -322,7 +278,18 @@ def display_weather(
 
     if save_image or show_image or show_on_inky:
         import weatherDisplay
-        weatherDisplay.main(forecast, latlong, bg_file, bg_map, zoom, show_on_inky, inky_colour, show_image, save_image, banner, location_banner, verbose)
+        weatherDisplay.main(forecast, 
+        latlong, 
+        bg_file, 
+        bg_map, 
+        zoom, 
+        show_on_inky, 
+        inky_colour, 
+        show_image, 
+        save_image, 
+        banner, 
+        location_banner, 
+        verbose)
 
 
 
@@ -344,11 +311,11 @@ if __name__ == "__main__":
 
 
 
-    #Dark Sky Banner
+    #Banner
     parser.add_argument(
         '-b', '--banner',
-        help= 'banner message at top of screen. Darksky API requires this to be visible',
-        default= 'Powered by Dark Sky',
+        help= 'banner message at top of screen.',
+        default= '',
         required= False)
 
     #mutually exclusive group: latlong or location
@@ -427,7 +394,7 @@ if __name__ == "__main__":
         required= False)
 
 
-    #Save pickle of forecast from darksky to this filepath
+    #Save pickle of forecast  to this filepath
     parser.add_argument(
         '-sf', '--saveforecast',
         help= "save forecast data to filepath, e.g. '/path/weather.pickle'. If filepath is a directory, the filename will be automatically generated and place in that directory.",
@@ -436,17 +403,17 @@ if __name__ == "__main__":
     #mutually exclusive group: load pickle or ask for previous forecast data
     forecast_time= parser.add_mutually_exclusive_group()
 
-    #Load Pickle instead of getting forecast from darksky
+    #Load Pickle instead of getting current forecast
     forecast_time.add_argument(
         '-lf', '--loadforecast',
-        help= 'load forecast data from filepath instead of getting forecast from Darksky.',
+        help= 'load forecast data from filepath instead of live forecast.',
         required= False)
 
 
-    #get forecast from darksky for this date and time.
+    #get forecast for this date and time.
     forecast_time.add_argument(
         '-o', '--old',
-        help= "get forecast from Darksky for this date and time. Use 'YYYY-MM-DD'. You don't need to add hours and minutes.",
+        help= "get forecast for this date and time. Use 'YYYY-MM-DD'. You don't need to add hours and minutes.",
         type= valid_date,
         required= False)
 
@@ -499,41 +466,3 @@ if __name__ == "__main__":
         verbose= args.verbose)
 
 
-
-'''
-#to make directories:
-import os
-os.getcwd() #show we're in the right dir
-
-icons= ['clear-day', 'clear-night', 'rain', 'snow', 'sleet', 'wind', 'fog', 'cloudy', 'partly-cloudy-day', 'partly-cloudy-night']
-for icon in icons:
-    os.mkdir(icon)
-
-
-#setup for different displays
-if args.type == "phat":
-    inky_display = InkyPHAT(colour)
-    scale_size = 1
-    padding = 0
-elif args.type == "what":
-    inky_display = InkyWHAT(colour)
-    scale_size = 2.20
-    padding = 15
-    
-########################################
-
-#to show cloud cover, icons and time:
-import weather_v005
-forecast= weatherWHAT.get_weather()
-for i in forecast.hourly.data:
-     i.time.strftime("%A %d %b %Y %H:%M"),i.icon
-
-
-
-#to save/used saved weather
-import pickle
-pickle.dump(forecast, open("2019_08_05__05_59_weather.pickle", "wb"))
-forecast= pickle.load(open("2019_08_05__05_59_weather.pickle", "rb"))
-
-
-'''
