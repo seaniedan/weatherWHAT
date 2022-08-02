@@ -1,19 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # weather display
-# by Sean Danischevsky 2019
+# by Sean Danischevsky 2019, 2022
 #
-# get weather from Darksky and display on screen or Pimeroni InkyWhat
-# this file takes the command line input and passes the forecast data
-# to weatherDisplay for processing and display
+# get weather from met office website
+# https://www.metoffice.gov.uk/services/data/met-office-weather-datahub 
+# and display on screen or Pimeroni InkyWhat
+#
+# this file takes the command line input and gets the forecast data
+# then optionally calls
+# weatherDisplay for display as an image on InkyWhat or as a saved image
 
 
-#default preferences
-latlong= (51.5515, -0.1344) # default location for weather forecast. Get this by copying from Google Maps URL.
-
-#imports
 import argparse        
 
+try:
+    import api
+except:
+    print ("Please register with The Meteorological Office, https://metoffice.apiconnect.ibmcloud.com/metoffice/production/ - enter your email adress and create a password, copy your API key and save it in a file next to this one, called\napi.py")
+    raise Exception
 
 
 def valid_date(s):
@@ -27,47 +32,12 @@ def valid_date(s):
         raise argparse.ArgumentTypeError(msg)
 
 
-
-
-
-def read_lines(filename):
-    #output a text file as a list of lines
-    with open(filename) as f:
-        content = f.readlines()
-        #remove whitespace characters like `\n` at the end of each line
-        content = [x.strip() for x in content] 
-    return content
-
-def read_line(filename):
-    #output a text file andread first line
-    with open(filename) as f:
-        line = f.readline().strip()
-    return line
-
-def get_API_from_file():
-    import os
-
-    try:
-        api_path= os.path.join(os.path.dirname(__file__), 'api.txt')
-        API_KEY= read_line(api_path)
-        return API_KEY
-    except:
-        print ("Please register with The Meteorological Office, https://metoffice.apiconnect.ibmcloud.com/metoffice/production/ - enter your email adress and create a password, copy your API key and save it in a file next to this one, called\napi.txt")
-        raise Exception
-
-
-
-
-
-
 def load_forecast(loadforecastfile):
     #load pickled forecast data
 
     import pickle
 
     return pickle.load(open(loadforecastfile, "rb"))
-
-
 
 
 def save_forecast(forecast, saveforecast):
@@ -92,13 +62,10 @@ def save_forecast(forecast, saveforecast):
     return pickle.load(open(saveforecastfile, "rb"))
 
 
-
-
-
-
 #run on command line:
 def display_weather(
-    latlong= latlong, 
+    lat= api.lat, 
+    lon= api.lon, 
     bg_file= None,
     bg_map= False, 
     zoom= False,
@@ -126,109 +93,64 @@ def display_weather(
     # verbose: if True, display diagnostic info
 
     import met_weather
-    import datetime
 
     #load or save pickled forecasts
     if loadforecast:
         forecast= load_forecast(loadforecast)  
-    elif old:
-        # datetime(year, month, day, hour, minute, second, microsecond)
-        forecast= get_old_weather(latlong, old) #old must be a datetime object
+        # TODO: need to set 'now' from forecast object
     else:
-        forecast= met_weather.get_forecast(latlong)
-
-
+        # get current forecast
+        now, local_timezone_name, local_now= met_weather.get_now()
+        forecast= met_weather.get_forecast(lon, lat)
 
     if saveforecast:
         #save weather and reload it to check
         forecast= save_forecast(forecast, saveforecast)
     
-
-
     # Parse data for text display
-    # high and low temperatures in the next 24 hours:
-
-    # data[0] = today, but I don't use
-    # temperature_high_time= forecast.daily.data[0].temperature_high_time
-    # because high for the next day would appear after midnight
-    # and I wanted to see the low at 7am (or whenever it was still coming)
-    high= met_weather.high(forecast)
-    low= min(forecast.hourly.data[:24], key= lambda x: x.temperature)
-
-    #short text forecast summary
-    summary= forecast.hourly.summary
+    forecast_elements= {'local_now':local_now}
 
     # next sunrise and sunset times
-    sunrise_time= forecast.daily.data[0].sunrise_time
-    sunset_time= forecast.daily.data[0].sunset_time
-
-    # get soonest alert
-    alerts= forecast.alerts
-    if alerts:
-        min_alert= min(alerts, key= lambda x: x.time)
-        alert= "{}: {}".format(min_alert.time.strftime("%A %H:%M"), min_alert.title)
-        #alerts+= "\n".join(alert for alert in set(forecast_alert_titles))
-    else:
-        alert= None
+    forecast_elements['sun_msg']= met_weather.get_next_sunrise_or_sunset_msg(now, api.lon, api.lat, local_timezone_name)
 
 
+    features= forecast['features']
+    timeSeries= features[0]['properties']['timeSeries']
+    idx= met_weather.get_current_timestamp_index(forecast, now)
 
+    # current temperature
+    screenTemperature= timeSeries[idx]['screenTemperature']    
+    forecast_elements['temperature_msg']= str(round(screenTemperature))+ "°"
 
-
-
-
-
-
+    # high and low temperatures in the next 24 hours:
+    forecast_elements['hi_lo_msg']= met_weather.get_high_low_msg(timeSeries[idx:][:24], now, local_timezone_name)
 
     #choose and format data for text
-    temperature_msg= str(round(forecast.currently.temperature))+ "°"
-    update_msg= "\n".join((banner, location_banner, forecast.currently.time.strftime("%A %d %b %Y")))
+    forecast_elements["update_msg"]= "\n".join((banner, location_banner, local_now.strftime("%A %d %b %Y")))
 
 
-    #hi/lo 
-    if (low.time < high.time) and low.time- forecast.currently.time > datetime.timedelta(hours= 1):# and (low.time- forecast.currently.time).seconds > datetime.timedelta(hours= 1).seconds: 
-        high_next= False 
-        hi_lo_msg= "low({}) @ {}".format(str(round(low.temperature))+ "°", low.time.strftime("%H:%M"))       
+    #short text forecast summary
+    # TODO GET FROM RSS FEED
+    summary= ""
 
-    else:
-        #high time is next 
-        high_next= True
-        hi_lo_msg= "high({}) @ {}".format(str(round(high.temperature))+ "°", high.time.strftime("%H:%M"))  
-
-
-
-    #sunrise/sunset time
-    try:
-        if (sunrise_time < forecast.currently.time < sunset_time):
-            #it's day time
-            sun_msg= "sunset @ {}".format(sunset_time.strftime("%H:%M"))
-            summary= forecast.hourly.summary.rstrip(".")
-        else:
-            # night time
-            sun_msg= "sunrise @ {}".format(sunrise_time.strftime("%H:%M"))
-            summary= forecast.daily.summary.rstrip(".")
-    except:
-        #We're at the North pole and there's no sunset
-        sun_msg= ""
-        summary= forecast.hourly.summary.rstrip(".")
-
-
-
-
+    # get soonest alert
+    #TODO: get alert from RSS feed
+    alert= None
 
     #switch summary for alert if there is one
     if alert:
         summary= alert  
 
+    forecast_elements["summary"]= summary
+
+    forecast_elements["forecast_icon"]= met_weather.significantWeatherCode[timeSeries[idx]['significantWeatherCode']]
+
+    forecast_elements["hours"]= [met_weather.convert_utc_to_local(met_weather.convert_from_iso(t['time']), local_timezone_name).strftime("%H") for t in timeSeries[idx:][:24]]
+
+
 
     #here is where you could do a check to see if the screen needs updating-
     #save old version and if new != old, update
-
-
-
-
-
-
 
     if verbose:
         print()
@@ -258,28 +180,20 @@ def display_weather(
         for alert in alerts:
             print("ALERT! {}: {}".format(alert.time.strftime("%A %H:%M"), alert.title))
 
-
-
-
-
-
     #display weather in text only mode (not wrapped/formatted to screen).
     print ("############################################")
-    print (update_msg) #date
-    print (forecast.currently.icon)
-    print (temperature_msg)
-    print (hi_lo_msg)
-    print (sun_msg)
-    print (summary)#'Overcast throughout the day.'       
+    print (forecast_elements["update_msg"]) #date
+    print (forecast_elements["forecast_icon"])
+    print (forecast_elements["temperature_msg"])
+    print (forecast_elements["hi_lo_msg"])
+    print (forecast_elements["sun_msg"])
+    print (forecast_elements["summary"])#'Overcast throughout the day.'       
     print ("############################################")
-
-
-
 
     if save_image or show_image or show_on_inky:
         import weatherDisplay
-        weatherDisplay.main(forecast, 
-        latlong, 
+        weatherDisplay.main(forecast_elements, 
+        lat, lon, 
         bg_file, 
         bg_map, 
         zoom, 
@@ -292,24 +206,15 @@ def display_weather(
         verbose)
 
 
-
-
-
-
-
 #run on command line:
 if __name__ == "__main__":
     parser= argparse.ArgumentParser()
-
-
 
     #verbose
     parser.add_argument(
         '-v', '--verbose',
         help= 'show diagnostic info.',
         action= "store_true")
-
-
 
     #Banner
     parser.add_argument(
@@ -321,8 +226,6 @@ if __name__ == "__main__":
     #mutually exclusive group: latlong or location
     location= parser.add_mutually_exclusive_group()
 
-
-
     #latitude, longitude
     location.add_argument(
         '-ll', '--latlong',
@@ -330,17 +233,11 @@ if __name__ == "__main__":
         help= "forecast for location as 'latitude, longitude'. Use quotes and a space before negative numbers, e.g. -ll ' -5.55 66' .",
         required= False)
 
-
     #latitude, longitude
     location.add_argument(
         '-l', '--location',
         help= 'forecast for location in plain text, e.g. postode, streetname. Requires https://github.com/geopy/geopy ',
-        #default= (51.5515, -0.1344)
         required= False)
-
-
-
-
 
     # mutually exclusive group: map or zoomed map
     bg= parser.add_mutually_exclusive_group()
@@ -358,15 +255,12 @@ if __name__ == "__main__":
         action= "store_true",
         required= False)
 
-
     #filepath of image to Display. If a folder, choose randomly from that folder. 
     bg.add_argument(
         '-bg', '--bg',
         help= 'Filepath of background image to display. If a folder, choose randomly from that folder. If the folders have one of the following values: clear-day, clear-night, rain, snow, sleet, wind, fog, cloudy, partly-cloudy-day, or partly-cloudy-night, the appropriate weather icon will be taken from that folder.',
         default= None,
         required= False)
-
-
 
     #InkyWhat
     parser.add_argument(
@@ -376,8 +270,8 @@ if __name__ == "__main__":
         required= False)
 
     parser.add_argument('--type', '-t', type=str, required=False, choices=["what", "phat"], default= "what", help="type of display")
-    parser.add_argument('--colour', '-c', type=str, required=False, choices=["red", "black", "yellow"], default= "black", help="ePaper display colour")
 
+    parser.add_argument('--colour', '-c', type=str, required=False, choices=["red", "black", "yellow"], default= "black", help="ePaper display colour")
 
     #Display Image
     parser.add_argument(
@@ -386,13 +280,11 @@ if __name__ == "__main__":
         action= "store_true",
         required= False)
 
-
     #Save Image
     parser.add_argument(
         '-s', '--save',
         help= 'Save image filepath.',
         required= False)
-
 
     #Save pickle of forecast  to this filepath
     parser.add_argument(
@@ -409,7 +301,6 @@ if __name__ == "__main__":
         help= 'load forecast data from filepath instead of live forecast.',
         required= False)
 
-
     #get forecast for this date and time.
     forecast_time.add_argument(
         '-o', '--old',
@@ -417,40 +308,35 @@ if __name__ == "__main__":
         type= valid_date,
         required= False)
 
-
-    
-
-
-
     args= parser.parse_args()
 
     location_banner= ""
 
     if args.latlong:
         latlong= args.latlong
+        lat, lon= latlong.split(',')
         if args.verbose: 
-            print ('Latitude, Longitude:', latlong)
-        latlong= latlong.split(',')
-        latlong= [float(l) for l in latlong]
+            print ('Latitude, Longitude:', lat, ",", lon)
 
     elif args.location:
         from geopy.geocoders import Nominatim
-        geolocator= Nominatim(user_agent= "Sean Danischevsky")
+        geolocator= Nominatim(user_agent= api.user_agent)
         location= geolocator.geocode(args.location)
-        latlong= (location.latitude, location.longitude)
-        #print (location.raw)
+        lat, lon= location.latitude, location.longitude
+        location_banner= location.address
+        # print (location.raw)
         # location.raw['boundingbox'] returns latitude min, max, longitude min, max:
         # ['48.8155755', '48.902156', '2.224122', '2.4697602']
-        print ("{}\nLatitude, Longitude:\n{}, {}".format(location.address,location.latitude,location.longitude))
-        location_banner= location.address
+        # print ("{}\nLatitude, Longitude:\n{}, {}".format(location.address, location.latitude, location.longitude))
 
     if (args.bg or args.map or args.zoom) and (not args.inky and not args.display and not args.save):
-        #user has gone to the trouble of specifting an image, but they won't see it!
+        # user has gone to the trouble of specifting an image, but they won't see it!
         parser.error("--bg, --map or --zoom requires --display, --save or --inky.")
     
 
     display_weather(
-        latlong= latlong, 
+        lat= api.lat,
+        lon= api.lon, 
         bg_file= args.bg,
         bg_map= args.map, 
         zoom= args.zoom,
@@ -464,5 +350,3 @@ if __name__ == "__main__":
         banner= args.banner,
         location_banner= location_banner,
         verbose= args.verbose)
-
-
