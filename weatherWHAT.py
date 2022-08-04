@@ -125,8 +125,8 @@ def display_weather(
     # high and low temperatures in the next 24 hours:
     forecast_elements['hi_lo_msg']= met_weather.get_high_low_msg(timeSeries[idx:][:24], now, local_timezone_name)
 
-    #choose and format data for text
-    forecast_elements["update_msg"]= "\n".join((banner, location_banner, local_now.strftime("%A %d %b %Y")))
+    #date
+    forecast_elements["local_now"]= local_now.strftime("%A %d %b %Y")
 
 
     #short text forecast summary
@@ -147,48 +147,45 @@ def display_weather(
 
     forecast_elements["hours"]= [met_weather.convert_utc_to_local(met_weather.convert_from_iso(t['time']), local_timezone_name).strftime("%H") for t in timeSeries[idx:][:24]]
 
+    forecast_elements["uvIndex"]= [t['uvIndex'] for t in timeSeries[idx:][:24]]
+
+    forecast_elements["precipitationRate"]= [t['precipitationRate'] for t in timeSeries[idx:][:24]]
+    forecast_elements["probOfPrecipitation"]= [t['probOfPrecipitation']/100.0 for t in timeSeries[idx:][:24]]
 
 
     #here is where you could do a check to see if the screen needs updating-
     #save old version and if new != old, update
 
-    if verbose:
-        print()
-        print ("TEMPERATURE")
-        for hour in forecast.hourly.data:
-            print (hour.time.strftime("%A %d %b %Y %H:%M"), hour.temperature)     
-        print()
-        print ("CLOUD COVER")
-        for hour in forecast.hourly.data:
-            print (hour.time.strftime("%A %d %b %Y %H:%M"), hour.cloud_cover)                      
-        print()
-        print ("UV INDEX")
-        for hour in forecast.hourly.data:
-            print (hour.time.strftime("%A %d %b %Y %H:%M"), hour.uv_index)  
-        print()
-        print ('forecast.currently.time:{}'.format(forecast.currently.time.strftime("%A %d %b %Y %H:%M")))
-        print ("icon:", forecast.currently.icon)#'rain'
-        print ("hourly summary:", forecast.hourly.summary)#'Overcast throughout the day.'
-        print ("daily summary:", forecast.daily.summary)#'Light rain on Monday through next Saturday, with high temperatures falling to 22°C on Wednesday.'
-        print ("current temperature:", forecast.currently.temperature), "degrees"#17.11
-        print ('High:{}({})'.format(high.temperature, high.time.strftime("%A %d %b %Y %H:%M")))
-        print ('Low:{}({})'.format(low.temperature, low.time.strftime("%A %d %b %Y %H:%M")))
-        print ('current precipitation probability:', forecast.currently.precip_probability)
-        print ('current precipitation intensity:', forecast.currently.precip_intensity)
-        print ("sunrise time:", sunrise_time.strftime("%A %d %b %Y %H:%M")) 
-        print ("sunset time:", sunset_time.strftime("%A %d %b %Y %H:%M"))     
-        for alert in alerts:
-            print("ALERT! {}: {}".format(alert.time.strftime("%A %H:%M"), alert.title))
+
 
     #display weather in text only mode (not wrapped/formatted to screen).
-    print ("############################################")
-    print (forecast_elements["update_msg"]) #date
+    print ("#"*len(forecast_elements["hours"])*4)
+    print (banner)
+    print (location_banner)
+    print (forecast_elements["local_now"]) #date
     print (forecast_elements["forecast_icon"])
     print (forecast_elements["temperature_msg"])
     print (forecast_elements["hi_lo_msg"])
     print (forecast_elements["sun_msg"])
-    print (forecast_elements["summary"])#'Overcast throughout the day.'       
-    print ("############################################")
+    print (forecast_elements["summary"])#'Overcast throughout the day.'   
+
+    if verbose:
+        print()
+        print ("Hourly Temperature")
+        print ("   ".join([hour for hour in forecast_elements["hours"]]))
+        print()
+        print ("UV index:")
+        print (" ".join([str(hour) for hour in forecast_elements["uvIndex"]]))
+        print()
+        print ('Precipitation Rate:')
+        print (" ".join([str(hour) for hour in forecast_elements["precipitationRate"]]))
+        print ('Precipitation intensity:')
+        print (" ".join([str(hour) for hour in forecast_elements["probOfPrecipitation"]]))
+
+
+
+
+    print ("#"*len(forecast_elements["hours"])*4)
 
     if save_image or show_image or show_on_inky:
         import weatherDisplay

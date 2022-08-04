@@ -662,7 +662,7 @@ def text_box2(img, x0, y0, x1, y1, msg, initial_scale, font, fill= None, spacing
 
 
 
-def main(forecast, 
+def main(forecast_elements, 
     lat, lon, 
     bg_file,
     bg_map, 
@@ -718,7 +718,7 @@ def main(forecast,
             elif os.path.isdir(os.path.join(os.path.dirname(__file__), bg_file)):
                 #choose icon from named structure within folder
                 #the dirs are icon names
-                basedir= os.path.join(os.path.join(os.path.dirname(__file__), bg_file), forecast.currently.icon)
+                basedir= os.path.join(os.path.join(os.path.dirname(__file__), bg_file), forecast_elements["forecast_icon"])
                 if os.path.isdir(basedir):
                     img= choose_bg_from_folder(basedir)
 
@@ -745,7 +745,7 @@ def main(forecast,
             
         else:
             #choose from default icon list
-            basedir= os.path.join(os.path.dirname(__file__), 'icons','default', forecast.currently.icon)
+            basedir= os.path.join(os.path.dirname(__file__), 'icons','default', forecast_elements["forecast_icon"])
             img= choose_bg_from_folder(basedir)
             img= resize_fill(img, w, h) 
 
@@ -786,13 +786,13 @@ def main(forecast,
         top_line+= 25
 
     # forecast time
-    img= write_in_box(img, 0, top_line, w, 40+top_line, forecast.currently.time.strftime("%A %d %b %Y"), 20, summary_font_loader(20), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
+    img= write_in_box(img, 0, top_line, w, 40+top_line, forecast_elements["local_now"], 20, summary_font_loader(20), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
 
 
     
     
     #current temperature
-    x0, y0, x1, y1= text_box2(img, 0, 0, w, h- 90, temperature_msg, int(50* 2.2), temperature_font_loader(int(50* 2.2)), 
+    x0, y0, x1, y1= text_box2(img, 0, 0, w, h- 90, forecast_elements["temperature_msg"], int(50* 2.2), temperature_font_loader(int(50* 2.2)), 
         fill= (255, 255, 0, 255), spacing= 0, align_x= "center", align_y= "center")
 
 
@@ -869,7 +869,7 @@ def main(forecast,
     font_size= 24
     below_max_length= False
     scale_adjust= 1
-    msg= sun_msg
+    msg= forecast_elements["sun_msg"]
 
     if msg:
         while not below_max_length:
@@ -917,7 +917,7 @@ def main(forecast,
 
     
 
-    #rain graphic / sun (UV) strength
+    #rain graphic and sun (UV) strength
 
     y0= 0
     y1= 130
@@ -926,46 +926,36 @@ def main(forecast,
     draw= ImageDraw.Draw(rain_img)
     font= summary_font_loader(14)
 
-    for i, hour in enumerate(forecast.hourly.data[:24]):
-        t= hour.time.strftime("%H")
-        p= int(hour.precip_probability* hour.precip_intensity* 25500) #should be x 255
-        if verbose:
-            print (hour.time.strftime("%A %d %b %Y %H:%M"), hour.precip_probability, hour.precip_intensity)                
-            if p:
-                print (hour.precip_type, p)
+    for i, hour in enumerate(forecast_elements["hours"]):
+        p= int(forecast_elements["probOfPrecipitation"][i]* forecast_elements["precipitationRate"][i]* 255* 100) #should be x 255
         x0= int(w/ 24* i)
         x1= int(w/ 24* (i+ 1))
-        #pcolor=255- p
-        pcolor= int(hour.precip_probability* 255* .5) #.5 is a fade factor - don't want bars too strong
-        #tcolor=(pcolor+ 128)% 255
+        pcolor= int(forecast_elements["probOfPrecipitation"][i]* 255* .5) #.5 is a fade factor - don't want bars too strong
         tcolor= 0                
-        if p:#>17:#>17 gives a value when inkied
-            #amount and probability of rain
-            #the /2 means scale london weather down to look good - your country may vary
+        if p:
             #rain_indicator
-            draw.rectangle((x0, y1- 16- 1, x1- 1, y1- 16- 3), fill= (0, 0, 0, p))#color), outline= (0, 0, 0, p))
-
+            draw.rectangle((x0, y1- 16- 1, x1- 1, y1- 16- 3), fill= (0, 0, 0, p))
             #rain bars
-            draw.rectangle((x0, clamp(y0, y1- (hour.precip_intensity/ 2* (y1- y0)), y1- 16), x1- 1, y1- 16), fill= (0, 0, 0, pcolor), outline= (0, 0, 0, 255))
+            draw.rectangle((x0, clamp(y0, y1- (forecast_elements["precipitationRate"][i]/ 2* (y1- y0)), y1- 16), x1- 1, y1- 16), fill= (0, 0, 0, pcolor), outline= (0, 0, 0, 255))
         
 
 
 
         #UV rectangles
-        if hour.uv_index:            
+        if forecast_elements["uvIndex"][i]:            
             
-            if hour.uv_index == 1:
+            if forecast_elements["uvIndex"][i] == 1:
                 uv= int(255* .025)
-            elif hour.uv_index == 2:
+            elif forecast_elements["uvIndex"][i] == 2:
                 uv= int(255* .05)
-            elif hour.uv_index == 3:
+            elif forecast_elements["uvIndex"][i] == 3:
                 uv= int(255* .075)
             else:
-                uv= (hour.uv_index > 3)* 255
+                uv= (forecast_elements["uvIndex"][i] > 3)* 255
             draw.rectangle((x0, y1, x1- 1, y1- 16), fill= (255, 255, 255, 255), outline= (0, 0, 0, 255))
             draw.rectangle((x0, y1, x1- 1, y1- 16), fill= (255, 255, 0, uv), outline= (0, 0, 0, 255))
 
-        draw.text((x0+ 2, y0- 16+ y1), str(t), fill= (0, 0, 0, 255), font= font, align= 'center') #added a plus one to look better lined up
+        draw.text((x0+ 2, y0- 16+ y1), hour, fill= (0, 0, 0, 255), font= font, align= 'center') #added a plus one to look better lined up
         
 
         img.paste(rain_img, box= (0, h- y1), mask= rain_img)
@@ -976,9 +966,8 @@ def main(forecast,
 
 
     #forecast hourly summary at bottom
-    img= write_in_box(img, 0, 280- 120, w, 270, summary, 20, summary_font_loader(20), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "bottom")
+    #img= write_in_box(img, 0, 280- 120, w, 270, summary, 20, summary_font_loader(20), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "bottom")
 
-    #print(img.mode)
 
     if show_on_inky:
         #dither before saving or displaying
