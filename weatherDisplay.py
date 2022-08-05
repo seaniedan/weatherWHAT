@@ -54,7 +54,7 @@ def choose_bg_from_folder(basedir):
 
 
 
-def load_map(lat, long):
+def load_map(lat, lon):
     #load map image and draw longitude and latidude lines
 
     import os
@@ -96,7 +96,7 @@ def load_map(lat, long):
 
 
 
-def load_map_zoom(lat, long):
+def load_map_zoom(lat, lon, w, h):
     #load map image and zoom to given latitude and longitude
 
     import os
@@ -653,7 +653,73 @@ def text_box2(img, x0, y0, x1, y1, msg, initial_scale, font, fill= None, spacing
         return temperature_x, temperature_y, temperature_x+ temperature_w, temperature_y+ temperature_h
 
 
+def setup_canvas(w,h, forecast_icon, bg_file, bg_map, zoom, lon, lat):
+    import os
+    try:
+        if bg_file:
 
+        #user has specified a background
+            if os.path.isfile(bg_file):
+                #load image from absolute file path or file path relative to their location
+                img= Image.open(bg_file)
+            
+            elif os.path.isfile(os.path.join(os.path.dirname(__file__), bg_file)):
+                #load file relative to this script
+                img= Image.open(os.path.join(os.path.dirname(__file__), bg_file))
+
+            elif os.path.isdir(bg_file):
+                #choose icon from named structure within folder
+                #the dirs are icon names
+                basedir= os.path.join(bg_file, forecast_icon)
+                if os.path.isdir(basedir):
+                    img= choose_bg_from_folder(basedir)
+
+                else:
+                    #choose random bg from folder
+                    img= choose_bg_from_folder(bg_file)
+
+
+            elif os.path.isdir(os.path.join(os.path.dirname(__file__), bg_file)):
+                #choose icon from named structure within folder
+                #the dirs are icon names
+                basedir= os.path.join(os.path.join(os.path.dirname(__file__), bg_file), forecast_icon)
+                if os.path.isdir(basedir):
+                    img= choose_bg_from_folder(basedir)
+
+                else:
+                    #choose random bg from folder
+                    img= choose_bg_from_folder(os.path.join(os.path.dirname(__file__), bg_file))
+
+            else:
+                print ("Can't load \n{}\n as background. Please specify a directory or filename. Try using an absolute path?".format(os.path.abspath(bg_file)))
+
+            img= remove_transparency(img)
+            img= resize_fill(img, w, h) 
+
+
+
+
+        elif bg_map:
+            #load map image
+            img= load_map(lat, lon)   
+            img= resize_distort(img, w, h) 
+        elif zoom:
+            #load zoomed map image
+            img= load_map_zoom(lat, lon, w, h)
+            
+        else:
+            #choose from default icon list
+            basedir= os.path.join(os.path.dirname(__file__), 'icons','default', forecast_icon)
+            img= choose_bg_from_folder(basedir)
+            img= resize_fill(img, w, h) 
+
+    except Exception as e:
+        print(e, ": using blank background.")
+
+        #blank bg
+        img= Image.new("RGB", (w, h), color=(255, 255, 255))
+
+    return img
 
 
 
@@ -688,87 +754,16 @@ def main(forecast_elements,
         #go_to_screen= True# ...get screen size?
         w, h, ink_black, ink_color= setup_screen()
 
-
-
-    #setup canvas
-    try:
-        if bg_file:
-
-        #user has specified a background
-            if os.path.isfile(bg_file):
-                #load image from absolute file path or file path relative to their location
-                img= Image.open(bg_file)
-             
-            elif os.path.isfile(os.path.join(os.path.dirname(__file__), bg_file)):
-                #load file relative to this script
-                img= Image.open(os.path.join(os.path.dirname(__file__), bg_file))
-
-            elif os.path.isdir(bg_file):
-                #choose icon from named structure within folder
-                #the dirs are icon names
-                basedir= os.path.join(bg_file, forecast.currently.icon)
-                if os.path.isdir(basedir):
-                    img= choose_bg_from_folder(basedir)
-
-                else:
-                    #choose random bg from folder
-                    img= choose_bg_from_folder(bg_file)
-
-
-            elif os.path.isdir(os.path.join(os.path.dirname(__file__), bg_file)):
-                #choose icon from named structure within folder
-                #the dirs are icon names
-                basedir= os.path.join(os.path.join(os.path.dirname(__file__), bg_file), forecast_elements["forecast_icon"])
-                if os.path.isdir(basedir):
-                    img= choose_bg_from_folder(basedir)
-
-                else:
-                    #choose random bg from folder
-                    img= choose_bg_from_folder(os.path.join(os.path.dirname(__file__), bg_file))
-
-            else:
-                print ("Can't load \n{}\n as background. Please specify a directory or filename. Try using an absolute path?".format(os.path.abspath(bg_file)))
-
-            img= remove_transparency(img)
-            img= resize_fill(img, w, h) 
-
-
-
-
-        elif bg_map:
-            #load map image
-            img= load_map(lat, lon)   
-            img= resize_distort(img, w, h) 
-        elif zoom:
-            #load zoomed map image
-            img= load_map_zoom(lat, lon)
-            
-        else:
-            #choose from default icon list
-            basedir= os.path.join(os.path.dirname(__file__), 'icons','default', forecast_elements["forecast_icon"])
-            img= choose_bg_from_folder(basedir)
-            img= resize_fill(img, w, h) 
-
-    except Exception as e:
-        print(e, ": using blank background.")
-
-        #blank bg
-        img= Image.new("RGB", (w, h), color=(255, 255, 255))
-
-
+    img= setup_canvas(w, h, forecast_elements["forecast_icon"], bg_file, bg_map, zoom, lon, lat)
 
     #add soft white top and bottom
     softshadow= Image.new("RGBA", (w, h), color= (255, 255, 255, 255))
     draw= ImageDraw.Draw(softshadow)
     draw.rectangle((0, 10, w, h- 50), fill= (0, 0, 0, 0))
 
-
-    #strongshadow= bg.filter(ImageFilter.GaussianBlur(25))
-
     softshadow= softshadow.filter(ImageFilter.GaussianBlur(50))
     img.paste("white", mask= softshadow)   
     img.convert("RGB")
-
 
     draw= ImageDraw.Draw(img)
 
@@ -809,7 +804,7 @@ def main(forecast_elements,
     font_size= 24
     below_max_length= False
     scale_adjust= 1
-    msg= hi_lo_msg
+    msg= forecast_elements['hi_lo_msg']
 
     while not below_max_length:
         summary_font= summary_font_loader(font_size* scale_adjust)

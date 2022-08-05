@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 # get weather from Met Office
 # by Sean Danischevsky
 # install: I used:
-# /usr/local/bin/python3 -m pip install geojson suncalc python-dateutil
+# /usr/local/bin/python3 -m pip install geojson suncalc python-dateutil 
 # /usr/local/bin/python3 -m pip install timezonefinder[numba] --user # also installs optional dependencies for increased performance
+
+#later in venv I used venv:
+# cd weatherWHAT
+# python -m venv venv
+# source venv/bin/activate
+# pip install geojson suncalc python-dateutil timezonefinder geopy
 
 # support: https://groups.google.com/g/metoffice-datapoint
 

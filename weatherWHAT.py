@@ -313,15 +313,29 @@ if __name__ == "__main__":
         latlong= args.latlong
         lat, lon= latlong.split(',')
         if args.verbose: 
-            print ('Latitude, Longitude:', lat, ",", lon)
-
+            print ('Latitude, Longitude from command arguments:', lat, ",", lon)
     elif args.location:
         from geopy.geocoders import Nominatim
-        geolocator= Nominatim(user_agent= api.user_agent)
+        geolocator= Nominatim(user_agent= api.user_agent)      
         location= geolocator.geocode(args.location)
-        lat, lon= location.latitude, location.longitude
-        location_banner= location.address
-        # print (location.raw)
+        try:
+            if args.verbose: 
+                print (location.raw)
+            lat, lon= location.latitude, location.longitude
+            location_banner= location.address
+            if args.verbose: 
+                print ('Latitude, Longitude from geopy:', lat, ",", lon)
+        except AttributeError:
+            print (f"Sorry, Geopy could not find location {args.location}!\nTry searching https://nominatim.openstreetmap.org/\nor look up the latitude and longitude on Google Maps, and enter the latitude and longitude with the '-ll' option.")
+            exit()
+    else:
+        # use default location from secrets file
+        lat= api.lat
+        lon= api.lon
+        if args.verbose: 
+            print ('Latitude, Longitude from secrets file:', lat, ",", lon)
+        # could be useful for map zoom:
+        # add variables to zoom to optionally take a box
         # location.raw['boundingbox'] returns latitude min, max, longitude min, max:
         # ['48.8155755', '48.902156', '2.224122', '2.4697602']
         # print ("{}\nLatitude, Longitude:\n{}, {}".format(location.address, location.latitude, location.longitude))
@@ -332,8 +346,8 @@ if __name__ == "__main__":
     
 
     display_weather(
-        lat= api.lat,
-        lon= api.lon, 
+        lat= lat,
+        lon= lon, 
         bg_file= args.bg,
         bg_map= args.map, 
         zoom= args.zoom,
