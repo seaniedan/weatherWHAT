@@ -8,23 +8,13 @@ Weather forecast display for the Pimeroni Inky wHAT, with global weather data po
 
 Download the git repo (if using Docker, you don't need to type 'sudo'):
 ```
-sudo apt-get update
-sudo apt install git
+sudo apt-get update && sudo apt install git
 git clone --depth=1 https://github.com/seaniedan/weatherWHAT.git
 ```
 
 ### Prerequisites
 
 If you are using Raspbian-lite, [install pip3.](./docs/raspbian-lite.md)
-
-Then you can install the libraries with:
-
-```
-cd weatherWHAT
-python -m venv venv
-source venv/bin/activate
-pip install geojson suncalc python-dateutil timezonefinder geopy
-```
 
 If you have one, [install, connect and test your Inky wHAT.](https://github.com/pimoroni/inky)
 
