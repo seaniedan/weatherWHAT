@@ -1,4 +1,4 @@
-To discover weather around the world using natural text ('Paris, France'), install [geopy](https://geopy.readthedocs.io/en/stable/)
+To get the sunrise and sunset times, weatherWHAT uses [suncalc](https://pypi.org/project/suncalc/). To discover weather around the world using natural text ('Paris, France'), install [geopy](https://geopy.readthedocs.io/en/stable/):
 ```
 cd weatherWHAT
 python3 -m venv venv
