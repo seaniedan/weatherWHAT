@@ -85,8 +85,8 @@ Please send a message or pull request if something isn't clear or doesn't work.
 Want to help? 
 * Write an installation script.
 * Share ideas, and folders of background images.
-* Rewrite it to work on different resolution screens.
-* Share your icon packages - see 'how to create an icon package' below.
+* Rewrite it to work better on different resolution screens, color InkyWHAT etc.
+* Write additional API's to connect to other weather services, e.g. [openweathermap](https://openweathermap.org/api).
 
 
 ## Author
