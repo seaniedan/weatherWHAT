@@ -153,7 +153,7 @@ def get_daily_forecast(lon, lat):
 
 
 # met office api significant weather codes
-significantWeatherCode={0: "Clear night",
+significantWeatherCode= {0: "Clear night",
 1: "Sunny day",
 2: "Partly cloudy (night)",
 3: "Partly cloudy (day)",
@@ -223,10 +223,18 @@ def get_high_low_msg(timeSeries, now, local_timezone_name):
 
     return high_low_msg
 
-
+def make_default_icon_dirs():
+    import os
+    for forecast_icon in significantWeatherCode.values():
+        #print (icon)
+        #print (os.path.join(, icon))
+        basedir= os.path.join(os.path.dirname(__file__), 'icons','default', forecast_icon)
+        print (basedir)
+        os.mkdir(basedir)
 
 if __name__=="__main__":
-
+    make_default_icon_dirs()
+    exit()
     now, local_timezone_name, local_now= get_now()
 
 

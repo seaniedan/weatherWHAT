@@ -1,2 +1,2 @@
 Put images in here with extensions:
-'.jpg', '.jpeg' or '.png'
+'.jpg', '.jpeg', '.png' or '.gif'

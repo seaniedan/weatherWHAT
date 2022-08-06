@@ -47,7 +47,7 @@ def choose_bg_from_folder(basedir):
     #print (icons)
     icon= random.choice(icons)
     saved_image_path= os.path.join(basedir, icon)
-    print ("chosen icon:", saved_image_path)
+    print (f"chose random icon from {basedir}:", saved_image_path)
     #load it
     img= Image.open(saved_image_path)
     return img
@@ -682,12 +682,14 @@ def setup_canvas(w,h, forecast_icon, bg_file, bg_map, zoom, lon, lat):
             elif os.path.isdir(os.path.join(os.path.dirname(__file__), bg_file)):
                 #choose icon from named structure within folder
                 #the dirs are icon names
+                print (111)
                 basedir= os.path.join(os.path.join(os.path.dirname(__file__), bg_file), forecast_icon)
                 if os.path.isdir(basedir):
                     img= choose_bg_from_folder(basedir)
 
                 else:
                     #choose random bg from folder
+                    print (222)
                     img= choose_bg_from_folder(os.path.join(os.path.dirname(__file__), bg_file))
 
             else:
