@@ -1,15 +1,31 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 # get weather from Met Office
 # by Sean Danischevsky
 # install: I used:
-# /usr/local/bin/python3 -m pip install geojson suncalc python-dateutil
+# /usr/local/bin/python3 -m pip install geojson suncalc python-dateutil 
 # /usr/local/bin/python3 -m pip install timezonefinder[numba] --user # also installs optional dependencies for increased performance
+
+#later in venv I used venv:
+# cd weatherWHAT
+# python -m venv venv
+# source venv/bin/activate
+# pip install geojson suncalc python-dateutil timezonefinder geopy
 
 # support: https://groups.google.com/g/metoffice-datapoint
 
 import api
 import datetime    
 from dateutil import tz
+
+def get_now():
+    now= datetime.datetime.now().astimezone(datetime.timezone.utc)
+    print ("Time now:", now)
+    local_timezone_name= get_local_timezone_name(api.lon, api.lat)
+    local_now= convert_utc_to_local(now, local_timezone_name)
+    print (f"Now as {local_timezone_name}: {local_now}")
+    return now, local_timezone_name, local_now
 
 
 def get_local_timezone_name(lon, lat):
@@ -18,7 +34,7 @@ def get_local_timezone_name(lon, lat):
     from timezonefinder import TimezoneFinder
 
     tf = TimezoneFinder()
-    return tf.timezone_at(lng=lon, lat=lat)  # 'Europe/Berlin'
+    return tf.timezone_at(lng= lon, lat= lat)  # 'Europe/Berlin'
 
 
 
@@ -48,7 +64,7 @@ def convert_utc_to_local(datetime_object, local_timezone_name):
 
 
 
-def get_next_sunrise_or_sunset_msg(now, lon, lat):
+def get_next_sunrise_or_sunset_msg(now, lon, lat, local_timezone_name):
     import suncalc
     import datetime
 
@@ -137,7 +153,7 @@ def get_daily_forecast(lon, lat):
 
 
 # met office api significant weather codes
-significantWeatherCode={0: "Clear night",
+significantWeatherCode= {0: "Clear night",
 1: "Sunny day",
 2: "Partly cloudy (night)",
 3: "Partly cloudy (day)",
@@ -181,13 +197,13 @@ def get_current_timestamp_index(forecast, given_time):
     # return min(timeSeries, key=lambda x:abs(convert_from_iso(x['time'])- given_time))
     idx= min(range(len(timeSeries)), key= lambda x: abs(convert_from_iso(timeSeries[x]['time'])- given_time))
     idx= min(range(len(timeSeries)), key= lambda t: abs(
-        datetime.datetime.fromisoformat(timeSeries[t]['time'][:-1]).replace(tzinfo= datetime.timezone.utc).astimezone(tz.gettz(local_timezone_name))
+        datetime.datetime.fromisoformat(timeSeries[t]['time'][:-1]).replace(tzinfo= datetime.timezone.utc)
         - given_time))
     return idx
 
 
 
-def get_high_low_msg(timeSeries):
+def get_high_low_msg(timeSeries, now, local_timezone_name):
     #parse met office JSON file to get highest temperature in next 24 hours
 
     high= max(timeSeries, key= lambda time: time['screenTemperature'])
@@ -207,18 +223,23 @@ def get_high_low_msg(timeSeries):
 
     return high_low_msg
 
-
+def make_default_icon_dirs():
+    import os
+    for forecast_icon in significantWeatherCode.values():
+        #print (icon)
+        #print (os.path.join(, icon))
+        basedir= os.path.join(os.path.dirname(__file__), 'icons','default', forecast_icon)
+        print (basedir)
+        os.mkdir(basedir)
 
 if __name__=="__main__":
+    make_default_icon_dirs()
+    exit()
+    now, local_timezone_name, local_now= get_now()
 
-    now= datetime.datetime.now().astimezone(datetime.timezone.utc)
-    print ("Time now:", now)
-    local_timezone_name= get_local_timezone_name(api.lon, api.lat)
-    local_now= convert_utc_to_local(now, local_timezone_name)
-    print (f"Now as {local_timezone_name}: {local_now}")
 
     # sunrise/sunset time
-    print (get_next_sunrise_or_sunset_msg(now, api.lon, api.lat))
+    print (get_next_sunrise_or_sunset_msg(now, api.lon, api.lat, local_timezone_name))
 
     # hourly forecast
     forecast= get_forecast(api.lon, api.lat)
@@ -227,7 +248,7 @@ if __name__=="__main__":
     #daily= get_daily_forecast(lon, lat)
     #print (daily)
 
-    features = forecast['features']
+    features= forecast['features']
     timeSeries= features[0]['properties']['timeSeries']
     idx= get_current_timestamp_index(forecast, now)
 
@@ -250,16 +271,16 @@ if __name__=="__main__":
 
 
     # hi / low temperature
-    print (get_high_low_msg(timeSeries[idx:][:24]))
+    print (get_high_low_msg(timeSeries[idx:][:24], now, local_timezone_name))
     
     # summary_message,
     # replace with forecast symbols for next days    
     # of there's an alert, replace with alert:
     # https://www.metoffice.gov.uk/weather/guides/rss
 
-    # times
-    times=[convert_utc_to_local(convert_from_iso(t['time']), local_timezone_name).strftime("%H") for t in timeSeries[idx:][:24]]
-    print (times)
+    # times (hours for rain, UV, etc)
+    hours=[convert_utc_to_local(convert_from_iso(t['time']), local_timezone_name).strftime("%H") for t in timeSeries[idx:][:24]]
+    print (hours)
 
     # UV index
     uvIndex= [t['uvIndex'] for t in timeSeries[idx:][:24]]

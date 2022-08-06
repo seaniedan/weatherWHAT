@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-
-#put this in a separate file/def:
 from PIL import Image, ImageFont, ImageDraw, ImageFilter
-#from PIL import ImageOps, ImageEnhance
 
 
 def mean_of_area(img, x0, y0, x1, y1):
@@ -39,8 +36,6 @@ def clamp(minvalue, value, maxvalue):
     return max(minvalue, min(value, maxvalue))
 
 
-
-
 def choose_bg_from_folder(basedir):
     #choose an images from icons directory
     #returns PILLOW IMAGE object
@@ -52,14 +47,14 @@ def choose_bg_from_folder(basedir):
     #print (icons)
     icon= random.choice(icons)
     saved_image_path= os.path.join(basedir, icon)
-    print ("chosen icon:", saved_image_path)
+    print (f"chose random icon from {basedir}:", saved_image_path)
     #load it
     img= Image.open(saved_image_path)
     return img
 
 
 
-def load_map(latlong):
+def load_map(lat, lon):
     #load map image and draw longitude and latidude lines
 
     import os
@@ -71,19 +66,16 @@ def load_map(latlong):
 
     draw= ImageDraw.Draw(img)
 
-
-    latitude, longitude= latlong
-
     #scale latlong to image size:
-    longitude= ((longitude/ 360.0)+ .5)* screen_w    
+    lon= ((lon/ 360.0)+ .5)* screen_w    
 
     #screen is inverted in Pillow:
-    latitude= (-latitude/ 180.0)+ .5
-    latitude*= screen_h
+    lat= (-lat/ 180.0)+ .5
+    lat*= screen_h
 
 
     # Vertical line
-    x = int(longitude)
+    x = int(lon)
     y_start = 0
     y_end = screen_h
     line = ((x, y_start), (x, y_end))
@@ -91,7 +83,7 @@ def load_map(latlong):
 
 
     # Horizontal line
-    y = int(latitude)
+    y = int(lat)
     x_start = 0
     x_end = screen_w
     line = ((x_start, y), (x_end, y))
@@ -104,7 +96,7 @@ def load_map(latlong):
 
 
 
-def load_map_zoom(latlong):
+def load_map_zoom(lat, lon, w, h):
     #load map image and zoom to given latitude and longitude
 
     import os
@@ -115,26 +107,19 @@ def load_map_zoom(latlong):
     img.convert('RGB')#.convert('RGBA')
     screen_w, screen_h= img.size
 
-    #draw= ImageDraw.Draw(img)
-
-
-    latitude, longitude= latlong
-
     #scale latlong to image size:
-    longitude= ((longitude/ 360.0)+ .5)* screen_w    
+    lon= ((lon/ 360.0)+ .5)* screen_w    
 
     #screen is inverted in Pillow:
-    latitude= (-latitude/ 180.0)+ .5
-    latitude*= screen_h
+    lat= (-lat/ 180.0)+ .5
+    lat*= screen_h
 
     #work out the crops
-    left= longitude-(400/ 2)
-    right= longitude+(400/ 2)
+    left= lon- (w/ 2)
+    right= lon+ (w/ 2)
 
-    upper= latitude-(300/ 2)
-    lower= latitude+(300/ 2)
-
-
+    upper= lat- (h/ 2)
+    lower= lat+ (h/ 2)
 
     img= img.crop((left, upper, right, lower))
     return img
@@ -179,13 +164,13 @@ def resize_fill(input_image, desired_width, desired_height):
     scale= max(scale_w, scale_h)
     #print ('scaling image by', scale)
     if scale_w < scale_h:
+        #crop sides
         new_h= desired_height
         new_w= int(scale* curr_w)
-        #print ('cropping sides')
     else:
+        # crop top and bottom
         new_w= desired_width
         new_h= int(scale* curr_h)
-        #print ('cropping top and bottom')
 
     input_image = input_image.resize((new_w, new_h), resample=Image.LANCZOS)
     bg.paste(input_image, box=(int((desired_width- new_w)/ 2.0), int((desired_height- new_h)/ 2.0)), mask=None)
@@ -383,7 +368,7 @@ def setup_screen():
     ink_color= 2
     ink_black= 1
 
-    return w,h, ink_black, ink_color #,fonts_dict
+    return w, h, ink_black, ink_color #,fonts_dict
 
 
 
@@ -412,8 +397,6 @@ def write_in_box(img, x0, y0, x1, y1, msg, initial_scale, font, fill= None, spac
             #reflow text to make the x shorter
             lines+= 1
             reflowed = textwrap.wrap(msg, width= math.ceil(len(msg)* 1.05/ float(lines)))  #fudge because textwrap sometimes gives too many lines here
-            #print (reflowed)
-            #print (lines)
             p_w, p_h= max((font.getsize(line) for line in reflowed))# Width and height of summary
             p_h= p_h* (len(reflowed))   # Multiply through by number of lines    
             reflowed_aspect= (p_w)/ float(p_h)
@@ -430,13 +413,10 @@ def write_in_box(img, x0, y0, x1, y1, msg, initial_scale, font, fill= None, spac
 
         while (p_w > max_width) or (p_h > max_height) and (initial_scale+ scale_adjust) > 1: #to stop endles loops
             #scale text to fit
-            #print (scale_adjust,  initial_scale,  initial_scale- scale_adjust)
             scale_adjust-= 1
             font= summary_font_loader(int(initial_scale+ scale_adjust))
             p_w, p_h= max((font.getsize(line) for line in reflowed))# Width and height of summary
             p_h= p_h* (len(reflowed))   # Multiply through by number of lines
-            #print ("pw,ph",p_w, p_h)
-
 
         centerline= (max_width- p_w)/ 2.0 #-helf a letter
         #print (centerline)
@@ -673,119 +653,8 @@ def text_box2(img, x0, y0, x1, y1, msg, initial_scale, font, fill= None, spacing
         return temperature_x, temperature_y, temperature_x+ temperature_w, temperature_y+ temperature_h
 
 
-
-
-
-
-
-
-
-
-
-def main(forecast, 
-    latlong, 
-    bg_file,
-    bg_map, 
-    zoom,
-    show_on_inky,
-    inky_colour,
-    show_image, 
-    save_image,
-    banner,
-    location_banner,
-    verbose):
-
-
+def setup_canvas(w,h, forecast_icon, bg_file, bg_map, zoom, lon, lat):
     import os
-    import datetime
-
-    #choose and format data for image display
-
-    #don't use temperature_high_time= forecast.daily.data[0].temperature_high_time
-    #because high for the next day would appear after midnight
-    #and I wanted to see the low at 7am (or whenever it was still coming)
-    high= max(forecast.hourly.data[:24], key= lambda x: x.temperature)
-    low= min(forecast.hourly.data[:24], key= lambda x: x.temperature)
-
-
-    
-
-    #daily[0] = TODAY
-    sunrise_time= forecast.daily.data[0].sunrise_time
-    sunset_time= forecast.daily.data[0].sunset_time
-
-    temperature_msg= str(round(forecast.currently.temperature))+ "°"
-
-
-
-
-
-
-    #hi/lo 
-
-    if (low.time < high.time) and low.time- forecast.currently.time > datetime.timedelta(hours= 1):# and (low.time- forecast.currently.time).seconds > datetime.timedelta(hours= 1).seconds: 
-        high_next= False 
-        hi_lo_msg= "low {}°\n{}".format(str(round(low.temperature)), low.time.strftime("%H:%M"))
-
-    else:
-        #high time is next 
-        high_next= True
-        hi_lo_msg= "high {}°\n{}".format(str(round(high.temperature)), high.time.strftime("%H:%M"))    
-
-   
-
-
-
-
-
-    #sunrise/sunset time
-    try:
-        if (sunrise_time < forecast.currently.time < sunset_time):
-            #it's day time            
-            sun_msg= "sunset\n{}".format(sunset_time.strftime("%H:%M"))
-            summary= forecast.hourly.summary.rstrip(".")
-
-        else:
-            # night time
-            sun_msg= "sunrise\n{}".format(sunrise_time.strftime("%H:%M"))
-            summary= forecast.daily.summary.rstrip(".")
-    except:
-        #We're at the North pole and there's no sunset
-        sun_msg= ""
-        summary= forecast.hourly.summary.rstrip(".")
-
-
-
-    #replace summary with soonest alert
-    alerts= forecast.alerts
-    if alerts:
-        min_alert= min(alerts, key= lambda x: x.time)
-        alert= "{}: {}".format(min_alert.time.strftime("%A %H:%M"), min_alert.title)
-    else:
-        alert= None
-
-
-    if alert:
-        summary= alert #replace summary with alert    
-
-
-    #here is where you could do a check to see if the screen needs updating-
-    #save old version and if new != old, update
-
-    # create display image
-
-
-
-    # Set up the correct display and scaling factors
-    try:
-        w, h, ink_black, ink_color= setup_inky(inky_colour)
-    except:
-        #go_to_screen= True# ...get screen size?
-        w, h, ink_black, ink_color= setup_screen()
-
-
-
-    #setup canvas
     try:
         if bg_file:
 
@@ -793,7 +662,7 @@ def main(forecast,
             if os.path.isfile(bg_file):
                 #load image from absolute file path or file path relative to their location
                 img= Image.open(bg_file)
-             
+            
             elif os.path.isfile(os.path.join(os.path.dirname(__file__), bg_file)):
                 #load file relative to this script
                 img= Image.open(os.path.join(os.path.dirname(__file__), bg_file))
@@ -801,7 +670,7 @@ def main(forecast,
             elif os.path.isdir(bg_file):
                 #choose icon from named structure within folder
                 #the dirs are icon names
-                basedir= os.path.join(bg_file, forecast.currently.icon)
+                basedir= os.path.join(bg_file, forecast_icon)
                 if os.path.isdir(basedir):
                     img= choose_bg_from_folder(basedir)
 
@@ -813,12 +682,14 @@ def main(forecast,
             elif os.path.isdir(os.path.join(os.path.dirname(__file__), bg_file)):
                 #choose icon from named structure within folder
                 #the dirs are icon names
-                basedir= os.path.join(os.path.join(os.path.dirname(__file__), bg_file), forecast.currently.icon)
+                print (111)
+                basedir= os.path.join(os.path.join(os.path.dirname(__file__), bg_file), forecast_icon)
                 if os.path.isdir(basedir):
                     img= choose_bg_from_folder(basedir)
 
                 else:
                     #choose random bg from folder
+                    print (222)
                     img= choose_bg_from_folder(os.path.join(os.path.dirname(__file__), bg_file))
 
             else:
@@ -832,15 +703,15 @@ def main(forecast,
 
         elif bg_map:
             #load map image
-            img= load_map(latlong)   
+            img= load_map(lat, lon)   
             img= resize_distort(img, w, h) 
         elif zoom:
             #load zoomed map image
-            img= load_map_zoom(latlong)
+            img= load_map_zoom(lat, lon, w, h)
             
         else:
             #choose from default icon list
-            basedir= os.path.join(os.path.dirname(__file__), 'icons','default', forecast.currently.icon)
+            basedir= os.path.join(os.path.dirname(__file__), 'icons','default', forecast_icon)
             img= choose_bg_from_folder(basedir)
             img= resize_fill(img, w, h) 
 
@@ -850,20 +721,51 @@ def main(forecast,
         #blank bg
         img= Image.new("RGB", (w, h), color=(255, 255, 255))
 
+    return img
 
+
+
+
+
+
+
+
+def main(forecast_elements, 
+    lat, lon, 
+    bg_file,
+    bg_map, 
+    zoom,
+    show_on_inky,
+    inky_colour,
+    show_image, 
+    save_image,
+    banner,
+    location_banner,
+    verbose):
+
+
+    import os
+
+
+    # create display image
+
+    # Set up the correct display and scaling factors
+    try:
+        w, h, ink_black, ink_color= setup_inky(inky_colour)
+    except:
+        #go_to_screen= True# ...get screen size?
+        w, h, ink_black, ink_color= setup_screen()
+
+    img= setup_canvas(w, h, forecast_elements["forecast_icon"], bg_file, bg_map, zoom, lon, lat)
 
     #add soft white top and bottom
     softshadow= Image.new("RGBA", (w, h), color= (255, 255, 255, 255))
     draw= ImageDraw.Draw(softshadow)
     draw.rectangle((0, 10, w, h- 50), fill= (0, 0, 0, 0))
 
-
-    #strongshadow= bg.filter(ImageFilter.GaussianBlur(25))
-
     softshadow= softshadow.filter(ImageFilter.GaussianBlur(50))
     img.paste("white", mask= softshadow)   
     img.convert("RGB")
-
 
     draw= ImageDraw.Draw(img)
 
@@ -873,21 +775,21 @@ def main(forecast,
     top_line= 0
     # banner
     if banner:
-        img= write_in_box(img, 0, 0, 400, 40, banner, 20, summary_font_loader(20), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
+        img= write_in_box(img, 0, 0, w, 40, banner, 20, summary_font_loader(20), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
         top_line+= 25
     # location_banner
     if location_banner:
-        img= write_in_box(img, 0, top_line, 400, 40+top_line, location_banner, 20, summary_font_loader(20), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
+        img= write_in_box(img, 0, top_line, w, 40+top_line, location_banner, 20, summary_font_loader(20), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
         top_line+= 25
 
     # forecast time
-    img= write_in_box(img, 0, top_line, 400, 40+top_line, forecast.currently.time.strftime("%A %d %b %Y"), 20, summary_font_loader(20), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
+    img= write_in_box(img, 0, top_line, w, 40+top_line, forecast_elements["local_now"], 20, summary_font_loader(20), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
 
 
     
     
     #current temperature
-    x0, y0, x1, y1= text_box2(img, 0, 0, w, h- 90, temperature_msg, int(50* 2.2), temperature_font_loader(int(50* 2.2)), 
+    x0, y0, x1, y1= text_box2(img, 0, 0, w, h- 90, forecast_elements["temperature_msg"], int(50* 2.2), temperature_font_loader(int(50* 2.2)), 
         fill= (255, 255, 0, 255), spacing= 0, align_x= "center", align_y= "center")
 
 
@@ -904,7 +806,7 @@ def main(forecast,
     font_size= 24
     below_max_length= False
     scale_adjust= 1
-    msg= hi_lo_msg
+    msg= forecast_elements['hi_lo_msg']
 
     while not below_max_length:
         summary_font= summary_font_loader(font_size* scale_adjust)
@@ -964,7 +866,7 @@ def main(forecast,
     font_size= 24
     below_max_length= False
     scale_adjust= 1
-    msg= sun_msg
+    msg= forecast_elements["sun_msg"]
 
     if msg:
         while not below_max_length:
@@ -1012,7 +914,7 @@ def main(forecast,
 
     
 
-    #rain graphic / sun (UV) strength
+    #rain graphic and sun (UV) strength
 
     y0= 0
     y1= 130
@@ -1021,49 +923,39 @@ def main(forecast,
     draw= ImageDraw.Draw(rain_img)
     font= summary_font_loader(14)
 
-    for i, hour in enumerate(forecast.hourly.data[:24]):
-        t= hour.time.strftime("%H")
-        p= int(hour.precip_probability* hour.precip_intensity* 25500) #should be x 255
-        if verbose:
-            print (hour.time.strftime("%A %d %b %Y %H:%M"), hour.precip_probability, hour.precip_intensity)                
-            if p:
-                print (hour.precip_type, p)
+    for i, hour in enumerate(forecast_elements["hours"]):
+        p= int(forecast_elements["probOfPrecipitation"][i]* forecast_elements["precipitationRate"][i]* 255* 100) #should be x 255
         x0= int(w/ 24* i)
         x1= int(w/ 24* (i+ 1))
-        #pcolor=255- p
-        pcolor= int(hour.precip_probability* 255* .5) #.5 is a fade factor - don't want bars too strong
-        #tcolor=(pcolor+ 128)% 255
+        pcolor= int(forecast_elements["probOfPrecipitation"][i]* 255* .5) #.5 is a fade factor - don't want bars too strong
         tcolor= 0                
-        if p:#>17:#>17 gives a value when inkied
-            #amount and probability of rain
-            #the /2 means scale london weather down to look good - your country may vary
+        if p:
             #rain_indicator
-            draw.rectangle((x0, y1- 16- 1, x1- 1, y1- 16- 3), fill= (0, 0, 0, p))#color), outline= (0, 0, 0, p))
-
+            draw.rectangle((x0, y1- 16- 1, x1- 1, y1- 16- 3), fill= (0, 0, 0, p))
             #rain bars
-            draw.rectangle((x0, clamp(y0, y1- (hour.precip_intensity/ 2* (y1- y0)), y1- 16), x1- 1, y1- 16), fill= (0, 0, 0, pcolor), outline= (0, 0, 0, 255))
+            draw.rectangle((x0, clamp(y0, y1- (forecast_elements["precipitationRate"][i]/ 2* (y1- y0)), y1- 16), x1- 1, y1- 16), fill= (0, 0, 0, pcolor), outline= (0, 0, 0, 255))
         
 
 
 
         #UV rectangles
-        if hour.uv_index:            
+        if forecast_elements["uvIndex"][i]:            
             
-            if hour.uv_index == 1:
+            if forecast_elements["uvIndex"][i] == 1:
                 uv= int(255* .025)
-            elif hour.uv_index == 2:
+            elif forecast_elements["uvIndex"][i] == 2:
                 uv= int(255* .05)
-            elif hour.uv_index == 3:
+            elif forecast_elements["uvIndex"][i] == 3:
                 uv= int(255* .075)
             else:
-                uv= (hour.uv_index > 3)* 255
+                uv= (forecast_elements["uvIndex"][i] > 3)* 255
             draw.rectangle((x0, y1, x1- 1, y1- 16), fill= (255, 255, 255, 255), outline= (0, 0, 0, 255))
             draw.rectangle((x0, y1, x1- 1, y1- 16), fill= (255, 255, 0, uv), outline= (0, 0, 0, 255))
 
-        draw.text((x0+ 2, y0- 16+ y1), str(t), fill= (0, 0, 0, 255), font= font, align= 'center') #added a plus one to look better lined up
+        draw.text((x0+ 2, y0- 16+ y1), hour, fill= (0, 0, 0, 255), font= font, align= 'center') #added a plus one to look better lined up
         
 
-        img.paste(rain_img, box= (0, 300- y1), mask= rain_img)
+        img.paste(rain_img, box= (0, h- y1), mask= rain_img)
 
     img.convert("RGB")
 
@@ -1071,9 +963,8 @@ def main(forecast,
 
 
     #forecast hourly summary at bottom
-    img= write_in_box(img, 0, 280- 120, 400, 270, summary, 20, summary_font_loader(20), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "bottom")
+    #img= write_in_box(img, 0, 280- 120, w, 270, summary, 20, summary_font_loader(20), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "bottom")
 
-    #print(img.mode)
 
     if show_on_inky:
         #dither before saving or displaying
