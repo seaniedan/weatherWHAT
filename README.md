@@ -16,11 +16,9 @@ git clone --depth=1 https://github.com/seaniedan/weatherWHAT.git
 
 If you are using Raspbian-lite, [install pip3.](./docs/raspbian-lite.md)
 
+To show images and use the location functions, install [the rest of the prerequisites.](./docs/prerequisites.md)
+
 If you have one, [install, connect and test your Inky wHAT.](https://github.com/pimoroni/inky)
-
-If you want to show images, and use the location functions, install [the rest of the prerequisites.](./docs/prerequisites.md)
-
-You can also [install the additional prerequisites using Anaconda.](./docs/anacondaInstall.md)
 
 ### Install
 
@@ -33,6 +31,11 @@ nano api.py #or use your favourite text editor
 ```
 
 ## Deploy
+
+Set your environment:
+```
+source venv/bin/activate
+```
 
 To show the weather on the command line:
 ```
