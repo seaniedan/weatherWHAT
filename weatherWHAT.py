@@ -100,7 +100,7 @@ def display_weather(
         # TODO: need to set 'now' from forecast object
     else:
         # get current forecast
-        now, local_timezone_name, local_now= met_weather.get_now()
+        now, local_timezone_name, local_now= met_weather.get_now(lon, lat)
         forecast= met_weather.get_forecast(lon, lat)
 
     if saveforecast:

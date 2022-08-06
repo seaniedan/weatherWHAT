@@ -19,10 +19,10 @@ import api
 import datetime    
 from dateutil import tz
 
-def get_now():
+def get_now(lon, lat):
     now= datetime.datetime.now().astimezone(datetime.timezone.utc)
     print ("Time now:", now)
-    local_timezone_name= get_local_timezone_name(api.lon, api.lat)
+    local_timezone_name= get_local_timezone_name(lon, lat)
     local_now= convert_utc_to_local(now, local_timezone_name)
     print (f"Now as {local_timezone_name}: {local_now}")
     return now, local_timezone_name, local_now
@@ -235,7 +235,7 @@ def make_default_icon_dirs():
 if __name__=="__main__":
     make_default_icon_dirs()
     exit()
-    now, local_timezone_name, local_now= get_now()
+    now, local_timezone_name, local_now= get_now(api.lon, api.lat)
 
 
     # sunrise/sunset time
