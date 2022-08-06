@@ -1,2 +1,2 @@
-Put images in here with extensions:
-'.jpg', '.jpeg', '.png' or '.gif'
+Choose some pretty images for each folder. 
+Images must have extensions '.jpg', '.jpeg', '.png' or '.gif'
