@@ -1,17 +1,14 @@
 # weatherWHAT
 
-Weather forecast display for the Pimeroni Inky wHAT, with weather data powered by Dark Sky. If you don't have an Inky wHAT, you can display the weather on your desktop background or screensaver, or just as text in your terminal.
+Weather forecast display for the Pimeroni Inky wHAT, with global weather data powered by the UK's Met Office Weather DataHub. If you don't have an Inky wHAT, you can display the weather on your desktop background or screensaver, or just as text in your terminal.
 
 ![display example](./docs/images/color_moon.png)
-
-## ALERT: [Dark Sky, the provider on which this repo relies, no longer accept new signups. The API will continue to function through the end of 2022.](https://blog.darksky.net/) If you would like to help, please fork this repo, re-write it for a different free service, like [OpenWeatherMap](https://openweathermap.org/api) and create a pull request! I'd appreciate it and will merge it back!
 
 ## Get Started
 
 Download the git repo (if using Docker, you don't need to type 'sudo'):
 ```
-sudo apt-get update
-sudo apt install git
+sudo apt-get update && sudo apt install git
 git clone --depth=1 https://github.com/seaniedan/weatherWHAT.git
 ```
 
@@ -19,28 +16,26 @@ git clone --depth=1 https://github.com/seaniedan/weatherWHAT.git
 
 If you are using Raspbian-lite, [install pip3.](./docs/raspbian-lite.md)
 
-The [Python API wrapper for Dark Sky by Detrous](https://github.com/Detrous/darksky) is used to parse the weather information:
-```
-pip3 install darksky_weather
-```
+To show images and use the location functions, install [the rest of the prerequisites.](./docs/prerequisites.md)
 
 If you have one, [install, connect and test your Inky wHAT.](https://github.com/pimoroni/inky)
 
-If you want to show images, and use the location functions, install [the rest of the prerequisites.](./docs/prerequisites.md)
-
-You can also [install the additional prerequisites using Anaconda.](./docs/anacondaInstall.md)
-
 ### Install
 
-[Register with Dark Sky](https://darksky.net/dev/register), enter your email adress and create a password. The Dark Sky API allows 1000 free calls per day and you don't need to give any payment information. 
+[Register with Met Office Weather DataHub](https://metoffice.apiconnect.ibmcloud.com/metoffice/production/), enter your email adress and create a password. You also need to subscribe to their 'Site Specific forecast'. The service allows 360 free calls per day and you don't need to give any payment information. 
 
-Dark Sky will send you an email with an API code. Enter this code in api.txt by replacing the path below and using the API code they sent instead of the dummy code below (keep the quotes):
+You should receive a Client ID and Client Secret. Enter these values into the api.py file, by copying the example_api.py file:
 ```
-cd weatherWHAT/
-echo '1234567890abcde' > api.txt
+cp example_api.py api.py
+nano api.py #or use your favourite text editor
 ```
 
 ## Deploy
+
+Set your environment:
+```
+source venv/bin/activate
+```
 
 To show the weather on the command line:
 ```
@@ -90,8 +85,8 @@ Please send a message or pull request if something isn't clear or doesn't work.
 Want to help? 
 * Write an installation script.
 * Share ideas, and folders of background images.
-* Rewrite it to work on different resolution screens.
-* Share your icon packages - see 'how to create an icon package' below.
+* Rewrite it to work better on different resolution screens, color InkyWHAT etc.
+* Write additional API's to connect to other weather services, e.g. [openweathermap](https://openweathermap.org/api).
 
 
 ## Author
@@ -107,6 +102,6 @@ This project is licensed under the GNU General Public License v3.0 - see the [LI
 
 * [Raspberry Pi](https://www.raspberrypi.org) for a great device
 * [Pimeroni](https://shop.pimoroni.com) for their inspiring products
-* [Dark Sky](https://darksky.net) for hyperlocal weather data
+* Everyone at [Met Office Weather DataHub](https://metoffice.apiconnect.ibmcloud.com/metoffice/production/) for fabulous support and weather data
 * Lee at 90 Degrees Picture Framing, 124 Fortess Rd, London NW5 2HP (+44 20 7267 4121) for the super frame
 * Olivia and Benet for cool drawings of various types of weather
