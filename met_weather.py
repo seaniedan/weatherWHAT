@@ -233,8 +233,8 @@ def make_default_icon_dirs():
         os.mkdir(basedir)
 
 if __name__=="__main__":
-    make_default_icon_dirs()
-    exit()
+    #make_default_icon_dirs()
+    #exit()
     now, local_timezone_name, local_now= get_now(api.lon, api.lat)
 
 
