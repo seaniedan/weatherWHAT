@@ -153,8 +153,7 @@ def display_weather(
     forecast_elements["probOfPrecipitation"]= [t['probOfPrecipitation']/100.0 for t in timeSeries[idx:][:24]]
 
 
-    #here is where you could do a check to see if the screen needs updating-
-    #save old version and if new != old, update
+    forecast_elements['temperatures']= [str(round(t['screenTemperature']))    for t in timeSeries[idx:][:24]]   
 
 
 
@@ -171,17 +170,16 @@ def display_weather(
 
     if verbose:
         print()
-        print ("Hourly Temperature")
-        print ("   ".join([hour for hour in forecast_elements["hours"]]))
-        print()
         print ("UV index:")
-        print (" ".join([str(hour) for hour in forecast_elements["uvIndex"]]))
+        print ("   ".join([str(hour) for hour in forecast_elements["uvIndex"]]))
         print()
         print ('Precipitation Rate:')
-        print (" ".join([str(hour) for hour in forecast_elements["precipitationRate"]]))
+        print ("   ".join([str(hour) for hour in forecast_elements["precipitationRate"]]))
         print ('Precipitation intensity:')
         print (" ".join([str(hour) for hour in forecast_elements["probOfPrecipitation"]]))
-
+        print ("Hourly Temperature")
+        print ("  ".join(forecast_elements['temperatures']))
+        print ("  ".join([hour for hour in forecast_elements["hours"]]))
 
 
 

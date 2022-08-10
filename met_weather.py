@@ -223,6 +223,8 @@ def get_high_low_msg(timeSeries, now, local_timezone_name):
 
     return high_low_msg
 
+
+
 def make_default_icon_dirs():
     import os
     for forecast_icon in significantWeatherCode.values():
@@ -231,6 +233,7 @@ def make_default_icon_dirs():
         basedir= os.path.join(os.path.dirname(__file__), 'icons','default', forecast_icon)
         print (basedir)
         os.mkdir(basedir)
+
 
 if __name__=="__main__":
     #make_default_icon_dirs()
@@ -252,12 +255,8 @@ if __name__=="__main__":
     timeSeries= features[0]['properties']['timeSeries']
     idx= get_current_timestamp_index(forecast, now)
 
-    '''a=[(timeSeries[idx])]
-    for t in a:
-        b=datetime.datetime.fromisoformat(t['time'][:-1]).replace(tzinfo= datetime.timezone.utc)
-        c=b.astimezone(tz.gettz(local_timezone_name))
-        print ('time (string):', t['time'],'          strptime:', b.isoformat(),  '         tzinfo:', b.tzinfo, '           local:',  c.isoformat())
-    '''
+
+
     # current temperature
     screenTemperature= timeSeries[idx]['screenTemperature']    
     temperature_msg= str(round(screenTemperature))+ "°"

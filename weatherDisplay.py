@@ -682,14 +682,13 @@ def setup_canvas(w,h, forecast_icon, bg_file, bg_map, zoom, lon, lat):
             elif os.path.isdir(os.path.join(os.path.dirname(__file__), bg_file)):
                 #choose icon from named structure within folder
                 #the dirs are icon names
-                print (111)
+                print ("choosing bg from named structure within folder")
                 basedir= os.path.join(os.path.join(os.path.dirname(__file__), bg_file), forecast_icon)
                 if os.path.isdir(basedir):
                     img= choose_bg_from_folder(basedir)
 
                 else:
-                    #choose random bg from folder
-                    print (222)
+                    print ("choosing random bg from folder")
                     img= choose_bg_from_folder(os.path.join(os.path.dirname(__file__), bg_file))
 
             else:
@@ -783,13 +782,13 @@ def main(forecast_elements,
         top_line+= 25
 
     # forecast time
-    img= write_in_box(img, 0, top_line, w, 40+top_line, forecast_elements["local_now"], 20, summary_font_loader(20), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
+    img= write_in_box(img, 0, top_line, w, 40+ top_line, forecast_elements["local_now"], 20, summary_font_loader(20), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
 
 
     
     
     #current temperature
-    x0, y0, x1, y1= text_box2(img, 0, 0, w, h- 90, forecast_elements["temperature_msg"], int(50* 2.2), temperature_font_loader(int(50* 2.2)), 
+    x0, y0, x1, y1= text_box2(img, 0, 0, w, h- 90, forecast_elements["temperature_msg"], int(110), temperature_font_loader(int(110)), 
         fill= (255, 255, 0, 255), spacing= 0, align_x= "center", align_y= "center")
 
 
