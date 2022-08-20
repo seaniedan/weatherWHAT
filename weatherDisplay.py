@@ -37,17 +37,17 @@ def clamp(minvalue, value, maxvalue):
 
 
 def choose_bg_from_folder(basedir):
-    #choose an images from icons directory
+    #choose an images from backgrounds directory
     #returns PILLOW IMAGE object
     import os
     import random
 
-    icons= os.listdir(basedir)
-    icons= [icon for icon in icons if os.path.splitext(icon)[-1].lower() in ['.jpg', '.jpeg', '.png', '.gif']]
-    #print (icons)
-    icon= random.choice(icons)
-    saved_image_path= os.path.join(basedir, icon)
-    print (f"chose random icon from {basedir}:", saved_image_path)
+    backgrounds= os.listdir(basedir)
+    backgrounds= [background for background in backgrounds if os.path.splitext(background)[-1].lower() in ['.jpg', '.jpeg', '.png', '.gif']]
+    #print (backgrounds)
+    background= random.choice(backgrounds)
+    saved_image_path= os.path.join(basedir, background)
+    print (f"chose random background from {basedir}:", saved_image_path)
     #load it
     img= Image.open(saved_image_path)
     return img
@@ -59,7 +59,7 @@ def load_map(lat, lon):
 
     import os
 
-    img= Image.open(os.path.join(os.path.dirname(__file__), 'icons', 'map', 'equirectangular.jpg'))
+    img= Image.open(os.path.join(os.path.dirname(__file__), 'backgrounds', 'map', 'equirectangular.jpg'))
 
     img.convert('RGB')
     screen_w, screen_h= img.size
@@ -101,7 +101,7 @@ def load_map_zoom(lat, lon, w, h):
 
     import os
 
-    img= Image.open(os.path.join(os.path.dirname(__file__), 'icons', 'map', 'atlas1.jpg'))
+    img= Image.open(os.path.join(os.path.dirname(__file__), 'backgrounds', 'map', 'atlas1.jpg'))
 
     #img= remove_transparency(img)
     img.convert('RGB')#.convert('RGBA')
@@ -127,7 +127,7 @@ def load_map_zoom(lat, lon, w, h):
 
 def resize_fit(input_image, desired_width, desired_height):
     #args
-    #input_image = Image.open("/home/sean.danischevsky/Documents/4.info/pi/icons/sunny.png") 
+    #input_image = Image.open("/home/sean.danischevsky/Documents/4.info/pi/backgrounds/sunny.png") 
     #desired_width, desired_height= 400, 300
 
     bg= Image.new('RGB', (desired_width, desired_height), 'white')
@@ -155,7 +155,7 @@ def resize_fit(input_image, desired_width, desired_height):
 
 def resize_fill(input_image, desired_width, desired_height):
     #args
-    #input_image = Image.open("/home/sean.danischevsky/Documents/4.info/pi/icons/sunny.png") 
+    #input_image = Image.open("/home/sean.danischevsky/Documents/4.info/pi/backgrounds/sunny.png") 
     #desired_width, desired_height= 400, 300
 
     bg= Image.new('RGB', (desired_width, desired_height))
@@ -182,7 +182,7 @@ def resize_fill(input_image, desired_width, desired_height):
 
 def resize_distort(input_image, desired_width, desired_height):
     #args
-    #input_image = Image.open("/home/sean.danischevsky/Documents/4.info/pi/icons/sunny.png") 
+    #input_image = Image.open("/home/sean.danischevsky/Documents/4.info/pi/backgrounds/sunny.png") 
     #desired_width, desired_height= 400, 300
 
     return input_image.resize((desired_width, desired_height), resample=Image.LANCZOS)
@@ -653,7 +653,7 @@ def text_box2(img, x0, y0, x1, y1, msg, initial_scale, font, fill= None, spacing
         return temperature_x, temperature_y, temperature_x+ temperature_w, temperature_y+ temperature_h
 
 
-def setup_canvas(w,h, forecast_icon, bg_file, bg_map, zoom, lon, lat):
+def setup_canvas(w,h, forecast_background, bg_file, bg_map, zoom, lon, lat):
     import os
     try:
         if bg_file:
@@ -668,9 +668,9 @@ def setup_canvas(w,h, forecast_icon, bg_file, bg_map, zoom, lon, lat):
                 img= Image.open(os.path.join(os.path.dirname(__file__), bg_file))
 
             elif os.path.isdir(bg_file):
-                #choose icon from named structure within folder
-                #the dirs are icon names
-                basedir= os.path.join(bg_file, forecast_icon)
+                #choose background from named structure within folder
+                #the dirs are background names
+                basedir= os.path.join(bg_file, forecast_background)
                 if os.path.isdir(basedir):
                     img= choose_bg_from_folder(basedir)
 
@@ -680,10 +680,10 @@ def setup_canvas(w,h, forecast_icon, bg_file, bg_map, zoom, lon, lat):
 
 
             elif os.path.isdir(os.path.join(os.path.dirname(__file__), bg_file)):
-                #choose icon from named structure within folder
-                #the dirs are icon names
+                #choose background from named structure within folder
+                #the dirs are background names
                 print ("choosing bg from named structure within folder")
-                basedir= os.path.join(os.path.join(os.path.dirname(__file__), bg_file), forecast_icon)
+                basedir= os.path.join(os.path.join(os.path.dirname(__file__), bg_file), forecast_background)
                 if os.path.isdir(basedir):
                     img= choose_bg_from_folder(basedir)
 
@@ -709,8 +709,8 @@ def setup_canvas(w,h, forecast_icon, bg_file, bg_map, zoom, lon, lat):
             img= load_map_zoom(lat, lon, w, h)
             
         else:
-            #choose from default icon list
-            basedir= os.path.join(os.path.dirname(__file__), 'icons','default', forecast_icon)
+            #choose from default background list
+            basedir= os.path.join(os.path.dirname(__file__), 'backgrounds','default', forecast_background)
             img= choose_bg_from_folder(basedir)
             img= resize_fill(img, w, h) 
 
@@ -755,7 +755,7 @@ def main(forecast_elements,
         #go_to_screen= True# ...get screen size?
         w, h, ink_black, ink_color= setup_screen()
 
-    img= setup_canvas(w, h, forecast_elements["forecast_icon"], bg_file, bg_map, zoom, lon, lat)
+    img= setup_canvas(w, h, forecast_elements["forecast_background"], bg_file, bg_map, zoom, lon, lat)
 
     #add soft white top and bottom
     softshadow= Image.new("RGBA", (w, h), color= (255, 255, 255, 255))

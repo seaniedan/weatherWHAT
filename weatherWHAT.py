@@ -143,7 +143,7 @@ def display_weather(
 
     forecast_elements["summary"]= summary
 
-    forecast_elements["forecast_icon"]= met_weather.significantWeatherCode[timeSeries[idx]['significantWeatherCode']]
+    forecast_elements["forecast_background"]= met_weather.significantWeatherCode[timeSeries[idx]['significantWeatherCode']]
 
     forecast_elements["hours"]= [met_weather.convert_utc_to_local(met_weather.convert_from_iso(t['time']), local_timezone_name).strftime("%H") for t in timeSeries[idx:][:24]]
 
@@ -162,7 +162,7 @@ def display_weather(
     print (banner)
     print (location_banner)
     print (forecast_elements["local_now"]) #date
-    print (forecast_elements["forecast_icon"])
+    print (forecast_elements["forecast_background"])
     print (forecast_elements["temperature_msg"])
     print (forecast_elements["hi_lo_msg"])
     print (forecast_elements["sun_msg"])
@@ -253,7 +253,7 @@ if __name__ == "__main__":
     #filepath of image to Display. If a folder, choose randomly from that folder. 
     bg.add_argument(
         '-bg', '--bg',
-        help= 'Filepath of background image to display. If a folder, choose randomly from that folder. If the folders have one of the following values: clear-day, clear-night, rain, snow, sleet, wind, fog, cloudy, partly-cloudy-day, or partly-cloudy-night, the appropriate weather icon will be taken from that folder.',
+        help= 'Filepath of background image to display. If a folder, choose randomly from that folder. If the folders have one of the following values: clear-day, clear-night, rain, snow, sleet, wind, fog, cloudy, partly-cloudy-day, or partly-cloudy-night, the appropriate weather background will be taken from that folder.',
         default= None,
         required= False)
 
