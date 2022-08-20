@@ -40,25 +40,22 @@ def load_forecast(loadforecastfile):
     return pickle.load(open(loadforecastfile, "rb"))
 
 
-def save_forecast(forecast, saveforecast):
+def save_forecast(forecast, now, local_timezone_name, local_now, saveforecast):
     #save forecast data as a pickle file
     #input a dir or filepath
     #return pickled then unpickled object
 
     import os
-    import datetime
     import pickle
 
     if os.path.isdir(saveforecast):
-        #create a filename
-        now= datetime.datetime.now()
-        now= now.strftime("%Y_%m_%d__%H_%M")        
-        saveforecastfile= os.path.join(saveforecast, now+ '.pickle')
+        #create a filename      
+        saveforecastfile= os.path.join(saveforecast, now.strftime("%Y_%m_%d__%H_%M") + '.pickle')
         print ('saved filename', saveforecastfile)
     else:
         saveforecastfile= saveforecast
 
-    pickle.dump(forecast, open(saveforecastfile, "wb"))
+    pickle.dump((forecast, now, local_timezone_name, local_now), open(saveforecastfile, "wb"))
     return pickle.load(open(saveforecastfile, "rb"))
 
 
@@ -96,7 +93,7 @@ def display_weather(
 
     #load or save pickled forecasts
     if loadforecast:
-        forecast= load_forecast(loadforecast)  
+        forecast, now, local_timezone_name, local_now= load_forecast(loadforecast)  
         # TODO: need to set 'now' from forecast object
     else:
         # get current forecast
@@ -105,8 +102,12 @@ def display_weather(
 
     if saveforecast:
         #save weather and reload it to check
-        forecast= save_forecast(forecast, saveforecast)
+        forecast, now, local_timezone_name, local_now= save_forecast(forecast, now, local_timezone_name, local_now, saveforecast)
     
+
+    print (len(forecast))
+
+
     # Parse data for text display
     forecast_elements= {'local_now':local_now}
 
