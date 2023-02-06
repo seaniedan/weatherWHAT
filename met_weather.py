@@ -211,14 +211,16 @@ def get_high_low_msg(timeSeries, now, local_timezone_name):
 
     # choose hi/lo: earliest low, unless it's less than an hour away.
     low_time_utc= datetime.datetime.fromtimestamp(convert_from_iso(low['time']).replace(tzinfo= datetime.timezone.utc).timestamp(), tz= datetime.timezone.utc)
-
+    print('low_time_utc', low_time_utc)
     high_time_utc= datetime.datetime.fromtimestamp(convert_from_iso(high['time']).replace(tzinfo= datetime.timezone.utc).timestamp(), tz= datetime.timezone.utc)
-
+    print('high_time_utc', high_time_utc)
     if (low_time_utc < high_time_utc) and (convert_from_iso(low['time']) > now):
+        print('and low time > now (%s)' % now)
         # low is next
         high_low_msg= "low {}°\n{}".format(str(round(low['screenTemperature'])), convert_utc_to_local(convert_from_iso(low['time']), local_timezone_name).strftime("%H:%M"))
     else:
         # high is next 
+        print ('ekse', now)
         high_low_msg= "high {}°\n{}".format(str(round(high['screenTemperature'])), convert_utc_to_local(convert_from_iso(high['time']), local_timezone_name).strftime("%H:%M")) 
 
     return high_low_msg

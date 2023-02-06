@@ -75,7 +75,8 @@ def display_weather(
     old= False,
     banner= '',
     location_banner='',
-    verbose= False):
+    verbose= False,
+    width=300, height=200):
 
     # bg_file: image filepath for background. Can be a directory from which a random image is used.
     # bg_map: show location on map
@@ -104,8 +105,6 @@ def display_weather(
         #save weather and reload it to check
         forecast, now, local_timezone_name, local_now= save_forecast(forecast, now, local_timezone_name, local_now, saveforecast)
     
-
-    print (len(forecast))
 
 
     # Parse data for text display
@@ -199,7 +198,9 @@ def display_weather(
         save_image, 
         banner, 
         location_banner, 
-        verbose)
+        verbose,
+        width=width,
+        height=height)
 
 
 #run on command line:
@@ -265,8 +266,9 @@ if __name__ == "__main__":
         action= "store_true",
         required= False)
 
-    parser.add_argument('--type', '-t', type=str, required=False, choices=["what", "phat"], default= "what", help="type of display")
-
+    #parser.add_argument('--type', '-t', type=str, required=False, choices=["what", "phat"], default= "what", help="type of display")
+    parser.add_argument('--width', type=int, required=False, help="display image width")
+    parser.add_argument('--height', type=int, required=False, help="display image height")
     parser.add_argument('--colour', '-c', type=str, required=False, choices=["red", "black", "yellow"], default= "black", help="ePaper display colour")
 
     #Display Image
@@ -359,4 +361,6 @@ if __name__ == "__main__":
         old= args.old,
         banner= args.banner,
         location_banner= location_banner,
-        verbose= args.verbose)
+        verbose= args.verbose,
+        width= args.width,
+        height= args.height)
