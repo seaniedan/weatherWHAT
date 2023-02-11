@@ -17,7 +17,7 @@ import argparse
 try:
     import api
 except:
-    print ("Please register with The Meteorological Office, https://metoffice.apiconnect.ibmcloud.com/metoffice/production/ - enter your email adress and create a password, copy your API key and save it in a file next to this one, called\napi.py")
+    print ("Please register with The Meteorological Office, https://metoffice.apiconnect.ibmcloud.com/metoffice/production/ \n- enter your email adress and create a password, copy your API key and save it in a file next to this one, called\napi.py")
     raise Exception
 
 
@@ -267,8 +267,8 @@ if __name__ == "__main__":
         required= False)
 
     #parser.add_argument('--type', '-t', type=str, required=False, choices=["what", "phat"], default= "what", help="type of display")
-    parser.add_argument('--width', type=int, required=False, help="display image width")
-    parser.add_argument('--height', type=int, required=False, help="display image height")
+    parser.add_argument('--width', type=int, required=False, default=300, help="display image width")
+    parser.add_argument('--height', type=int, required=False, default=200, help="display image height")
     parser.add_argument('--colour', '-c', type=str, required=False, choices=["red", "black", "yellow"], default= "black", help="ePaper display colour")
 
     #Display Image

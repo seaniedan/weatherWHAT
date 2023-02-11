@@ -110,11 +110,11 @@ def load_map_zoom(lat, lon, w, h):
     lat*= screen_h
 
     #work out the crops
-    left= lon- (w/ 2)
-    right= lon+ (w/ 2)
+    left= lon- (width/ 2)
+    right= lon+ (width/ 2)
 
-    upper= lat- (h/ 2)
-    lower= lat+ (h/ 2)
+    upper= lat- (height/ 2)
+    lower= lat+ (height/ 2)
 
     img= img.crop((left, upper, right, lower))
     return img
@@ -637,7 +637,7 @@ def text_box2(img, x0, y0, x1, y1, msg, initial_scale, font, wh_scale, fill= Non
         return temperature_x, temperature_y, temperature_x+ temperature_w, temperature_y+ temperature_h
 
 
-def setup_canvas(w,h, forecast_background, bg_file, bg_map, zoom, lon, lat, verbose):
+def setup_canvas(width, height, forecast_background, bg_file, bg_map, zoom, lon, lat, verbose):
     import os
 
     try:
@@ -679,7 +679,7 @@ def setup_canvas(w,h, forecast_background, bg_file, bg_map, zoom, lon, lat, verb
                 print ("Can't load \n{}\n as background. Please specify a directory or filename. Try using an absolute path?".format(os.path.abspath(bg_file)))
 
             img= remove_transparency(img)
-            img= resize_fill(img, w, h, verbose) 
+            img= resize_fill(img, width, height, verbose) 
 
 
 
@@ -687,23 +687,23 @@ def setup_canvas(w,h, forecast_background, bg_file, bg_map, zoom, lon, lat, verb
         elif bg_map:
             #load map image
             img= load_map(lat, lon)   
-            img= resize_distort(img, w, h) 
+            img= resize_distort(img, width, height) 
 
         elif zoom:
             #load zoomed map image
-            img= load_map_zoom(lat, lon, w, h)
+            img= load_map_zoom(lat, lon, width, height)
             
         else:
             #choose from default background list
             basedir= os.path.join(os.path.dirname(__file__), 'backgrounds','default', forecast_background)
             img= choose_bg_from_folder(basedir)
-            img= resize_fill(img, w, h, verbose) 
+            img= resize_fill(img, width, height, verbose) 
 
     except Exception as e:
         print(e, ": using blank background.")
 
         #blank bg
-        img= Image.new("RGB", (w, h), color=(255, 255, 255))
+        img= Image.new("RGB", (width, height), color=(255, 255, 255))
 
     return img
 
@@ -734,24 +734,22 @@ def main(forecast_elements,
     # Set up the correct display and scaling factors
     if show_on_inky:
         try:
-            w, h, ink_black, ink_color= setup_inky(inky_colour)
+            width, height, ink_black, ink_color= setup_inky(inky_colour)
         except:
             #go_to_screen= True# ...get screen size?
             ink_black, ink_color= setup_screen()
-    else:
-        w, h= width, height
 
     #geometric mean of width and height
-    wh_scale= float(math.sqrt((w*w)+(h*h))  /  math.sqrt((300*300)+(200*200)))
-    w_scale= float(w / 300)
-    h_scale= float(h / 200)
-    print (w, h, wh_scale, w_scale, h_scale)
-    img= setup_canvas(w, h, forecast_elements["forecast_background"], bg_file, bg_map, zoom, lon, lat, verbose)
+    wh_scale= float(math.sqrt((width*width)+(height*height))  /  math.sqrt((300*300)+(200*200)))
+    w_scale= float(width / 300)
+    h_scale= float(height / 200)
+    #print (width, height, wh_scale, w_scale, h_scale)
+    img= setup_canvas(width, height, forecast_elements["forecast_background"], bg_file, bg_map, zoom, lon, lat, verbose)
 
     #add soft white top and bottom
-    softshadow= Image.new("RGBA", (w, h), color= (255, 255, 255, 255))
+    softshadow= Image.new("RGBA", (width, height), color= (255, 255, 255, 255))
     draw= ImageDraw.Draw(softshadow)
-    draw.rectangle((0, 10* h_scale, w, h- 50* h_scale), fill= (0, 0, 0, 0))
+    draw.rectangle((0, 10* h_scale, width, height- 50* h_scale), fill= (0, 0, 0, 0))
 
     softshadow= softshadow.filter(ImageFilter.GaussianBlur(50* wh_scale))
     img.paste("white", mask= softshadow)   
@@ -764,18 +762,18 @@ def main(forecast_elements,
     top_line= 0
     # banner
     if banner:
-        img= write_in_box(img, 0, 0, w, 40* wh_scale, banner, 20* wh_scale, summary_font_loader(20* wh_scale), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
+        img= write_in_box(img, 0, 0, width, 40* wh_scale, banner, 20* wh_scale, summary_font_loader(20* wh_scale), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
         top_line+= 25* wh_scale
     # location_banner
     if location_banner:
-        img= write_in_box(img, 0, top_line, w, 40* wh_scale+ top_line, location_banner, 20* wh_scale, summary_font_loader(2* wh_scale0), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
+        img= write_in_box(img, 0, top_line, width, 40* wh_scale+ top_line, location_banner, 20* wh_scale, summary_font_loader(2* wh_scale0), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
         top_line+= 25* wh_scale
 
     # forecast time
-    img= write_in_box(img, 0, top_line, w, 40* wh_scale+ top_line, forecast_elements["local_now"], 20* wh_scale, summary_font_loader(20* wh_scale), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
+    img= write_in_box(img, 0, top_line, width, 40* wh_scale+ top_line, forecast_elements["local_now"], 20* wh_scale, summary_font_loader(20* wh_scale), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
 
     #current temperature
-    x0, y0, x1, y1= text_box2(img, 0, 0, w, h- 90* h_scale, forecast_elements["temperature_msg"], int(110* wh_scale), temperature_font_loader(int(110* wh_scale)), wh_scale,
+    x0, y0, x1, y1= text_box2(img, 0, 0, width, height- 90* h_scale, forecast_elements["temperature_msg"], int(110* wh_scale), temperature_font_loader(int(110* wh_scale)), wh_scale,
         fill= (255, 255, 0, 255), spacing= 0, align_x= "center", align_y= "center")
 
 
@@ -787,7 +785,7 @@ def main(forecast_elements,
 
     #HI/Lo on LHS MIDDLE
     padding= 50* wh_scale
-    max_width= w- padding
+    max_width= width- padding
     max_height= 250* wh_scale
     font_size= 24* wh_scale
     below_max_length= False
@@ -807,7 +805,7 @@ def main(forecast_elements,
             scale_adjust*= .95
 
     # x- and y-coordinates for the top left of the summary
-    summary_x= 5* wh_scale   #do i need to check for the longest linw and get size of that?
+    summary_x= 5* wh_scale   #do i need to check for the longest line and get size of that?
     summary_y= temperature_y+ 48* wh_scale
 
     #draw it now
@@ -840,7 +838,7 @@ def main(forecast_elements,
 
     #sunrise/sunset on RHS MIDDLE
     padding= 0
-    max_width= w- padding
+    max_width= width- padding
     max_height= 250* wh_scale
     font_size= 24* wh_scale
     below_max_length= False
@@ -861,7 +859,7 @@ def main(forecast_elements,
                 scale_adjust*= .95
 
         # x and y coordinates for the top left of the summary
-        summary_x= w- p_w- 5* wh_scale
+        summary_x= width- p_w- 5* wh_scale
         summary_y= temperature_y+ 48* wh_scale
 
         bg= Image.new("RGBA", img.size, color= (0, 0, 0, 0))
@@ -891,14 +889,14 @@ def main(forecast_elements,
     y0= 0
     y1= int(130* wh_scale)
 
-    rain_img= Image.new("RGBA", (w, y1), color= (255, 255, 255, 0))
+    rain_img= Image.new("RGBA", (width, y1), color= (255, 255, 255, 0))
     draw= ImageDraw.Draw(rain_img)
     font= summary_font_loader(14* wh_scale)
 
     for i, hour in enumerate(forecast_elements["hours"]):
         p= int(forecast_elements["probOfPrecipitation"][i]* forecast_elements["precipitationRate"][i]* 255* 100) #should be x 255
-        x0= int(w/ 24* i)
-        x1= int(w/ 24* (i+ 1))
+        x0= int(width/ 24* i)
+        x1= int(width/ 24* (i+ 1))
         pcolor= int(forecast_elements["probOfPrecipitation"][i]* 255* .5) #.5 is a fade factor - don't want bars too strong
         tcolor= 0                
         if p:
@@ -924,7 +922,7 @@ def main(forecast_elements,
         draw.text((x0+ 2, y0- 16+ y1), hour, fill= (0, 0, 0, 255), font= font, align= 'center') #added a plus one to look better lined up
         
 
-        img.paste(rain_img, box= (0, h- y1), mask= rain_img)
+        img.paste(rain_img, box= (0, height- y1), mask= rain_img)
 
     #display or save:
     img.convert("RGB", 0)
