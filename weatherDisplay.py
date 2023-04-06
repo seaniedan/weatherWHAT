@@ -38,7 +38,7 @@ def clamp(minvalue, value, maxvalue):
 
 def choose_bg_from_folder(basedir):
     #choose an images from backgrounds directory
-    #returns PILLOW IMAGE object
+
     import os
     import random
 
@@ -47,11 +47,7 @@ def choose_bg_from_folder(basedir):
     #print (backgrounds)
     background= random.choice(backgrounds)
     saved_image_path= os.path.join(basedir, background)
-    if verbose:
-        print (f"chose random background from {basedir}:", saved_image_path)
-    #load it
-    img= Image.open(saved_image_path)
-    return img
+    return saved_image_path
 
 
 
@@ -656,6 +652,8 @@ def text_box2(img, x0, y0, x1, y1, msg, initial_scale, font, fill= None, spacing
 
 def setup_canvas(w,h, forecast_background, bg_file, bg_map, zoom, lon, lat):
     import os
+
+    msg=""
     try:
         if bg_file:
 
@@ -673,24 +671,31 @@ def setup_canvas(w,h, forecast_background, bg_file, bg_map, zoom, lon, lat):
                 #the dirs are background names
                 basedir= os.path.join(bg_file, forecast_background)
                 if os.path.isdir(basedir):
-                    img= choose_bg_from_folder(basedir)
-
+                    image_path=choose_bg_from_folder(basedir)
+                    img= Image.open(image_path)
+                    msg= f"chose random background from {basedir}: {image_path}"
                 else:
                     #choose random bg from folder
-                    img= choose_bg_from_folder(bg_file)
+                    image_path = choose_bg_from_folder(bg_file)
+                    img= Image.open(image_path)
+                    msg= f"chose random background from {bg_file}: {image_path}"
 
 
             elif os.path.isdir(os.path.join(os.path.dirname(__file__), bg_file)):
                 #choose background from named structure within folder
                 #the dirs are background names
-                msg= "choosing bg from named structure within folder"
                 basedir= os.path.join(os.path.join(os.path.dirname(__file__), bg_file), forecast_background)
                 if os.path.isdir(basedir):
-                    img= choose_bg_from_folder(basedir)
+                    image_path = choose_bg_from_folder(basedir)
+                    img= Image.open(image_path)
+                    msg= f"chose background from named structure within folder {basedir}: {image_path}"
+
 
                 else:
-                    msg= "choosing random bg from folder"
-                    img= choose_bg_from_folder(os.path.join(os.path.dirname(__file__), bg_file))
+                    basedir= os.path.join(os.path.dirname(__file__), bg_file)
+                    image_path= choose_bg_from_folder(basedir)
+                    img= Image.open(image_path)
+                    msg= f"chose random background from {basedir}: {image_path}"
 
             else:
                 msg= "Can't load \n{}\n as background. Please specify a directory or filename. Try using an absolute path?".format(os.path.abspath(bg_file))
@@ -712,7 +717,8 @@ def setup_canvas(w,h, forecast_background, bg_file, bg_map, zoom, lon, lat):
         else:
             #choose from default background list
             basedir= os.path.join(os.path.dirname(__file__), 'backgrounds','default', forecast_background)
-            img= choose_bg_from_folder(basedir)
+            image_path = choose_bg_from_folder(basedir)
+            img= Image.open(image_path)
             img= resize_fill(img, w, h) 
 
     except Exception as e:
