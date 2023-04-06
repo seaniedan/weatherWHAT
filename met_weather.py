@@ -21,10 +21,8 @@ from dateutil import tz
 
 def get_now(lon, lat):
     now= datetime.datetime.now().astimezone(datetime.timezone.utc)
-    print ("Time now:", now)
     local_timezone_name= get_local_timezone_name(lon, lat)
     local_now= convert_utc_to_local(now, local_timezone_name)
-    print (f"Now as {local_timezone_name}: {local_now}")
     return now, local_timezone_name, local_now
 
 
@@ -231,7 +229,7 @@ def make_default_icon_dirs():
         #print (icon)
         #print (os.path.join(, icon))
         basedir= os.path.join(os.path.dirname(__file__), 'icons','default', forecast_icon)
-        print (basedir)
+        #print (basedir)
         os.mkdir(basedir)
 
 
@@ -239,7 +237,8 @@ if __name__=="__main__":
     #make_default_icon_dirs()
     #exit()
     now, local_timezone_name, local_now= get_now(api.lon, api.lat)
-
+    print ("Time now:", now)
+    print (f"Now as {local_timezone_name}: {local_now}")
 
     # sunrise/sunset time
     print (get_next_sunrise_or_sunset_msg(now, api.lon, api.lat, local_timezone_name))

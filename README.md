@@ -14,7 +14,13 @@ git clone --depth=1 https://github.com/seaniedan/weatherWHAT.git
 
 ### Prerequisites
 
-If you are using Raspbian-lite, [install pip3.](./docs/raspbian-lite.md)
+If you are using Raspberry Pi OS lite, [install pip3.](./docs/raspbian-lite.md)
+
+To separate the required Python libraries from others in your system, it's recommended to deploy a virtual environment, e.g. 'venv':
+
+```
+python3 -m venv venv --prompt="weatherWHAT"
+```
 
 To show images and use the location functions, install [the rest of the prerequisites.](./docs/prerequisites.md)
 
@@ -32,7 +38,7 @@ nano api.py #or use your favourite text editor
 
 ## Deploy
 
-Set your environment:
+If using 'venv', set your environment:
 ```
 source venv/bin/activate
 ```

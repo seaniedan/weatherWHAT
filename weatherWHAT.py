@@ -51,7 +51,7 @@ def save_forecast(forecast, now, local_timezone_name, local_now, saveforecast):
     if os.path.isdir(saveforecast):
         #create a filename      
         saveforecastfile= os.path.join(saveforecast, now.strftime("%Y_%m_%d__%H_%M") + '.pickle')
-        print ('saved filename', saveforecastfile)
+        #print ('saved filename', saveforecastfile)
     else:
         saveforecastfile= saveforecast
 
@@ -105,7 +105,6 @@ def display_weather(
         forecast, now, local_timezone_name, local_now= save_forecast(forecast, now, local_timezone_name, local_now, saveforecast)
     
 
-    print (len(forecast))
 
 
     # Parse data for text display
@@ -159,18 +158,21 @@ def display_weather(
 
 
     #display weather in text only mode (not wrapped/formatted to screen).
-    print ("#"*len(forecast_elements["hours"])*4)
-    print (banner)
-    print (location_banner)
-    print (forecast_elements["local_now"]) #date
-    print (forecast_elements["forecast_background"])
-    print (forecast_elements["temperature_msg"])
-    print (forecast_elements["hi_lo_msg"])
-    print (forecast_elements["sun_msg"])
-    print (forecast_elements["summary"])#'Overcast throughout the day.'   
+    if verbose or not (save_image or show_image or show_on_inky):
+        print ("#"*len(forecast_elements["hours"])*4)
+        print (banner)
+        print (location_banner)
+        print (forecast_elements["local_now"]) #date
+        print (forecast_elements["forecast_background"])
+        print (forecast_elements["temperature_msg"])
+        print (forecast_elements["hi_lo_msg"])
+        print (forecast_elements["sun_msg"])
+        print (forecast_elements["summary"])#'Overcast throughout the day.'   
 
     if verbose:
         print()
+        print ("Time now:", now)
+        print (f"Now as {local_timezone_name}: {local_now}")
         print ("UV index:")
         print ("   ".join([str(hour) for hour in forecast_elements["uvIndex"]]))
         print()
@@ -183,8 +185,8 @@ def display_weather(
         print ("  ".join([hour for hour in forecast_elements["hours"]]))
 
 
-
-    print ("#"*len(forecast_elements["hours"])*4)
+    if verbose or not (save_image or show_image or show_on_inky):
+        print ("#"*len(forecast_elements["hours"])*4)
 
     if save_image or show_image or show_on_inky:
         import weatherDisplay

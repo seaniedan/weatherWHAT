@@ -47,7 +47,8 @@ def choose_bg_from_folder(basedir):
     #print (backgrounds)
     background= random.choice(backgrounds)
     saved_image_path= os.path.join(basedir, background)
-    print (f"chose random background from {basedir}:", saved_image_path)
+    if verbose:
+        print (f"chose random background from {basedir}:", saved_image_path)
     #load it
     img= Image.open(saved_image_path)
     return img
@@ -682,17 +683,17 @@ def setup_canvas(w,h, forecast_background, bg_file, bg_map, zoom, lon, lat):
             elif os.path.isdir(os.path.join(os.path.dirname(__file__), bg_file)):
                 #choose background from named structure within folder
                 #the dirs are background names
-                print ("choosing bg from named structure within folder")
+                msg= "choosing bg from named structure within folder"
                 basedir= os.path.join(os.path.join(os.path.dirname(__file__), bg_file), forecast_background)
                 if os.path.isdir(basedir):
                     img= choose_bg_from_folder(basedir)
 
                 else:
-                    print ("choosing random bg from folder")
+                    msg= "choosing random bg from folder"
                     img= choose_bg_from_folder(os.path.join(os.path.dirname(__file__), bg_file))
 
             else:
-                print ("Can't load \n{}\n as background. Please specify a directory or filename. Try using an absolute path?".format(os.path.abspath(bg_file)))
+                msg= "Can't load \n{}\n as background. Please specify a directory or filename. Try using an absolute path?".format(os.path.abspath(bg_file))
 
             img= remove_transparency(img)
             img= resize_fill(img, w, h) 
@@ -715,12 +716,12 @@ def setup_canvas(w,h, forecast_background, bg_file, bg_map, zoom, lon, lat):
             img= resize_fill(img, w, h) 
 
     except Exception as e:
-        print(e, ": using blank background.")
+        msg= e, ": using blank background."
 
         #blank bg
         img= Image.new("RGB", (w, h), color=(255, 255, 255))
 
-    return img
+    return img, msg
 
 
 
@@ -755,7 +756,9 @@ def main(forecast_elements,
         #go_to_screen= True# ...get screen size?
         w, h, ink_black, ink_color= setup_screen()
 
-    img= setup_canvas(w, h, forecast_elements["forecast_background"], bg_file, bg_map, zoom, lon, lat)
+    img, msg = setup_canvas(w, h, forecast_elements["forecast_background"], bg_file, bg_map, zoom, lon, lat)
+    if verbose:
+        print (msg)
 
     #add soft white top and bottom
     softshadow= Image.new("RGBA", (w, h), color= (255, 255, 255, 255))
@@ -975,7 +978,8 @@ def main(forecast_elements,
         img.convert("RGB")
         #save image
         img.save(save_image)
-        print (save_image)
+        if verbose:
+            print (save_image)
 
 
 
