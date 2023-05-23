@@ -19,6 +19,11 @@ import api
 import datetime    
 from dateutil import tz
 
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning) 
+
+
+
 def get_now(lon, lat):
     now= datetime.datetime.now().astimezone(datetime.timezone.utc)
     local_timezone_name= get_local_timezone_name(lon, lat)
