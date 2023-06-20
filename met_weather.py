@@ -121,7 +121,7 @@ def get_forecast(lon, lat):
             return json.loads(data)
 
         except http.client.RemoteDisconnected:
-            time.sleep(retry_delay) 
+            time.sleep(retry_delay_seconds)
     else:
         # If all retries fail, raise an error or handle it accordingly
         raise Exception(f"Failed to establish a connection after {max_retries} retries.")
