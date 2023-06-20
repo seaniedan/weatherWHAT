@@ -99,6 +99,10 @@ def get_forecast(lon, lat):
 
     import http.client
     import json
+    import time
+
+    max_retries=4
+    rery_delay_seconds=180
 
     #request
     conn = http.client.HTTPSConnection("api-metoffice.apiconnect.ibmcloud.com")
@@ -109,17 +113,19 @@ def get_forecast(lon, lat):
         'accept': "application/json"
         }
 
-    #conn.request("GET", f"/v0/forecasts/point/daily?excludeParameterMetadata=REPLACE_THIS_VALUE&includeLocationName=REPLACE_THIS_VALUE&latitude={lat}&longitude={lon}", headers=headers)
-    conn.request("GET", f"/v0/forecasts/point/hourly?excludeParameterMetadata=REPLACE_THIS_VALUE&includeLocationName=true&latitude={lat}&longitude={lon}", headers=headers)
-    res = conn.getresponse()
-    data = res.read()
+    for retry in range(max_retries):
+        try:
+            conn.request("GET", f"/v0/forecasts/point/hourly?excludeParameterMetadata=REPLACE_THIS_VALUE&includeLocationName=true&latitude={lat}&longitude={lon}", headers=headers)
+            res = conn.getresponse()
+            data = res.read()
+            return json.loads(data)
 
-    #print(data.decode("utf-8"))
-    ##################
-    #decode json
+        except http.client.RemoteDisconnected:
+            time.sleep(retry_delay) 
+    else:
+        # If all retries fail, raise an error or handle it accordingly
+        raise Exception(f"Failed to establish a connection after {max_retries} retries.")
 
-
-    return json.loads(data)
 
 
 
@@ -127,10 +133,6 @@ def get_daily_forecast(lon, lat):
 
     import http.client
     import json
-    
-    #parameters
-    #print (lon)
-    #print (lat)
 
     #request
     conn = http.client.HTTPSConnection("api-metoffice.apiconnect.ibmcloud.com")
@@ -142,14 +144,8 @@ def get_daily_forecast(lon, lat):
         }
 
     conn.request("GET", f"/v0/forecasts/point/daily?excludeParameterMetadata=REPLACE_THIS_VALUE&includeLocationName=REPLACE_THIS_VALUE&latitude={lat}&longitude={lon}", headers=headers)
-    #conn.request("GET", f"/v0/forecasts/point/hourly?excludeParameterMetadata=REPLACE_THIS_VALUE&includeLocationName=true&latitude={lat}&longitude={lon}", headers=headers)
     res = conn.getresponse()
     data = res.read()
-
-    #print(data.decode("utf-8"))
-    ##################
-    #decode json
-
 
     return json.loads(data)
 
