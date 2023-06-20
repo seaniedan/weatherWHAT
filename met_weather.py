@@ -16,12 +16,11 @@
 # support: https://groups.google.com/g/metoffice-datapoint
 
 import api
-import datetime    
+import datetime
 from dateutil import tz
 
 import warnings
-warnings.filterwarnings("ignore", category=RuntimeWarning) 
-
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 
 def get_now(lon, lat):
@@ -43,7 +42,7 @@ def get_local_timezone_name(lon, lat):
 
 
 def convert_from_iso(date_string):
-    # input time (date_string): 2022-08-01T17:00Z 
+    # input time (date_string): 2022-08-01T17:00Z
     # outputs timezone-aware datetime object, in UTC
     import datetime
     return datetime.datetime.fromisoformat(date_string[:-1]).astimezone(datetime.timezone.utc)
@@ -51,7 +50,7 @@ def convert_from_iso(date_string):
 
 
 def convert_utc_to_local(datetime_object, local_timezone_name):
-    # given a datetime object as UTC 
+    # given a datetime object as UTC
     # and a local timezone name, e.g. 'Europe/Berlin'
     # return local time
 
@@ -80,7 +79,7 @@ def get_next_sunrise_or_sunset_msg(now, lon, lat, local_timezone_name):
         sunset_utc= datetime.datetime.fromtimestamp(sunset.replace(tzinfo=datetime.timezone.utc).timestamp(), tz=datetime.timezone.utc)
 
         if (sunrise_utc < now < sunset_utc):
-            #it's day time            
+            #it's day time
             next_sunrise_or_sunset_msg= "sunset\n{}".format(convert_utc_to_local(sunset_utc, local_timezone_name).strftime("%H:%M"))
 
         else:
@@ -102,7 +101,7 @@ def get_forecast(lon, lat):
     import time
 
     max_retries=4
-    rery_delay_seconds=180
+    retry_delay_seconds=180
 
     #request
     conn = http.client.HTTPSConnection("api-metoffice.apiconnect.ibmcloud.com")
