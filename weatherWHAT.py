@@ -345,7 +345,7 @@ if __name__ == "__main__":
         # user has gone to the trouble of specifting an image, but they won't see it!
         parser.error("--bg, --map or --zoom requires --display, --save or --inky.")
     
-
+    print()
     display_weather(
         lat= lat,
         lon= lon, 

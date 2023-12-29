@@ -26,7 +26,7 @@ def roll(image, delta):
     part1 = image.crop((0, 0, delta, ysize))
     part2 = image.crop((delta, 0, xsize, ysize))
     image.paste(part2, (0, 0, xsize- delta, ysize))
-    image.paste(part1, (xsize-delta, 0, xsize, ysize))
+    image.paste(part1, (xsize- delta, 0, xsize, ysize))
 
     return image
 
@@ -91,7 +91,7 @@ def load_map(lat, lon):
 
 
 
-def load_map_zoom(lat, lon, w, h):
+def load_map_zoom(lat, lon, width, height):
     #load map image and zoom to given latitude and longitude
 
     import os
@@ -99,7 +99,7 @@ def load_map_zoom(lat, lon, w, h):
     img= Image.open(os.path.join(os.path.dirname(__file__), 'backgrounds', 'map', 'atlas1.jpg'))
 
     #img= remove_transparency(img)
-    img.convert('RGB')#.convert('RGBA')
+    img.convert('RGB')# .convert('RGBA')
     screen_w, screen_h= img.size
 
     #scale latlong to image size:
@@ -138,8 +138,6 @@ def resize_fit(input_image, desired_width, desired_height):
     else:
         new_w= desired_width
         new_h= int(scale*curr_h)
-        if verbose:
-            print ('padding top and bottom')
 
     input_image= input_image.resize((new_w, new_h), resample=Image.LANCZOS)
     bg.paste(input_image, box= (int((desired_width- new_w)/ 2.0), int((desired_height- new_h)/ 2.0)), mask=None)
@@ -303,6 +301,7 @@ def summary_font_loader(size):
 
     import os
 
+    size= int(size)
     try:
         from font_source_sans_pro import SourceSansProSemibold
         font= ImageFont.truetype(SourceSansProSemibold, size)
@@ -328,6 +327,7 @@ def temperature_font_loader(size):
 
     import os
 
+    size= int(size)
     try:
         from font_hanken_grotesk import HankenGroteskBold#, HankenGroteskMedium
         font= ImageFont.truetype(HankenGroteskBold, size)
@@ -369,10 +369,9 @@ def setup_screen():
 
 
 
-def write_in_box(img, x0, y0, x1, y1, msg, initial_scale, font, fill= None, spacing= 0, align_x= "center", align_y= "center", verbose=False):
+def write_in_box(img:Image, x0, y0, x1, y1, msg, initial_scale, font, fill= None, drop_shadow= None, spacing= 0, align_x= "center", align_y= "center", verbose=False) -> Image:
 
     #splits lines to fit the aspect ratio of the input box
-
     import textwrap
     import math
 
@@ -380,18 +379,20 @@ def write_in_box(img, x0, y0, x1, y1, msg, initial_scale, font, fill= None, spac
         max_width= x1- x0
         max_height= y1- y0
         aspect= (x1- x0)/ float(y1- y0)
+
+        #initial reflowed message is one line
         reflowed= [msg]
         lines= 1
         
-        p_w, p_h= max((font.getsize(line) for line in reflowed))# Width and height of summary
+        p_w, p_h= max((font.getsize(line) for line in reflowed))# biggest width and height of line in pixels
         p_h= p_h* (len(reflowed))   # Multiply through by number of lines
    
         reflowed_aspect= (p_w)/ float(p_h)
 
         while reflowed_aspect > aspect and lines < 100:
-            #reflow text to make the x shorter
+            #reflow text to make width shorter
             lines+= 1
-            reflowed = textwrap.wrap(msg, width= math.ceil(len(msg)* 1.05/ float(lines)))  #fudge because textwrap sometimes gives too many lines here
+            reflowed = textwrap.wrap(msg, width= math.ceil(len(msg)* 1.0005/ float(lines)))  #fudge because textwrap sometimes gives too many lines here
             p_w, p_h= max((font.getsize(line) for line in reflowed))# Width and height of summary
             p_h= p_h* (len(reflowed))   # Multiply through by number of lines    
             reflowed_aspect= (p_w)/ float(p_h)
@@ -406,14 +407,14 @@ def write_in_box(img, x0, y0, x1, y1, msg, initial_scale, font, fill= None, spac
 
         scale_adjust= 0
 
-        while (p_w > max_width) or (p_h > max_height) and (initial_scale+ scale_adjust) > 1: #to stop endles loops
+        while (p_w > max_width) or (p_h > max_height) and (initial_scale+ scale_adjust) > 1: # stop endless loops
             #scale text to fit
             scale_adjust-= 1
             font= summary_font_loader(int(initial_scale+ scale_adjust))
             p_w, p_h= max((font.getsize(line) for line in reflowed))# Width and height of summary
             p_h= p_h* (len(reflowed))   # Multiply through by number of lines
 
-        centerline= (max_width- p_w)/ 2.0 #-helf a letter
+        centerline= (max_width- p_w)/ 2.0 # -half a letter
         reflowed= "\n".join(reflowed)
         if verbose:
             print ('reflowed text:', reflowed)
@@ -422,79 +423,35 @@ def write_in_box(img, x0, y0, x1, y1, msg, initial_scale, font, fill= None, spac
         elif align_y == "bottom":
             topline= y1- p_h
         else:
+            #centre
             topline= ((y1- y0)/ 2.0)- p_h
-
 
 
 
         bg= Image.new("RGBA", img.size, color= (0, 0, 0, 0))
 
         draw= ImageDraw.Draw(bg)
-        draw.text((centerline, topline), reflowed, fill= fill, font= font, spacing= spacing, align= align_x)
-        
-        outline= bg.filter(ImageFilter.MaxFilter(size= 3)).filter(ImageFilter.GaussianBlur(5))
-        strongshadow= bg.filter(ImageFilter.GaussianBlur(25))
-        softshadow= bg.filter(ImageFilter.GaussianBlur(50))
+        draw.text((centerline, topline), reflowed, fill, font= font, spacing= spacing, align= align_x)
+        if drop_shadow:
 
-        img.paste("white", mask= outline)   
-        img.convert("RGB")
-        img.paste("white", mask= softshadow)   
-        img.convert("RGB")
-        img.paste("white", mask= strongshadow)  
-        img.convert("RGB")
+            outline= bg.filter(ImageFilter.MaxFilter(size= 3)).filter(ImageFilter.GaussianBlur(5))
+            strongshadow= bg.filter(ImageFilter.GaussianBlur(25))
+            softshadow= bg.filter(ImageFilter.GaussianBlur(50))
+
+            img.paste(drop_shadow, mask= outline)   
+            img.convert("RGB")
+            img.paste(drop_shadow, mask= softshadow)   
+            img.convert("RGB")
+            img.paste(drop_shadow, mask= strongshadow)  
+            img.convert("RGB")
 
         img.paste(bg, mask= bg)
         img.convert("RGB")
 
-        return img
+        return img, centerline, topline, centerline+ p_w, topline+ p_h
 
 
 
-
-def text_box(img, x0, y0, x1, y1, msg, initial_scale, font, fill= None, spacing= 0, align_x= "center", align_y= "center"):
-    #write a single line in a text box
-    #return final coordinates of text on image
-    if msg:
-        max_width= x1- x0
-        max_height= y1- y0
-
-        scale_adjust= 0
-
-        temperature_font= temperature_font_loader(int(initial_scale))
-        temperature_w, temperature_h= font.getsize(msg)
-
-        while (temperature_w > max_width ) or ( temperature_h > max_height ) and ((initial_scale+ scale_adjust) > 1):
-
-            scale_adjust-= 1
-            font= temperature_font_loader(int(initial_scale+ scale_adjust))   #MUST CHANGE THIS
-            new_w, new_h= temperature_font.getsize(msg)
-            if (new_w, new_h) == (temperature_w, temperature_h):
-                break
-            else:
-                temperature_w, temperature_h= temperature_font.getsize(msg)
-
-        temperature_x= int((max_width- temperature_w)/ 2)
-        temperature_y= int((max_height- temperature_h)/ 2)#0#+ padding
-
-
-        bg= Image.new("RGBA", img.size, color= (255, 255, 0, 0))
-
-
-        draw= ImageDraw.Draw(bg)
-        draw.text((temperature_x, temperature_y), msg, fill= (255, 255, 0, 255), font= font)
-
-        
-        strongshadow= bg.filter(ImageFilter.GaussianBlur(25))
-
-        softshadow= bg.filter(ImageFilter.GaussianBlur(50))
-        img.paste("white", mask= softshadow)
-        img.convert("RGB")
-        img.paste("white", mask= strongshadow)  
-        img.convert("RGB")
-        img.paste(bg, mask= bg)
-        img.convert("RGB")
-
-        return temperature_x, temperature_y, temperature_x+ temperature_w, temperature_y+ temperature_h
 
 
 
@@ -579,62 +536,6 @@ def mean_x(img):
 
     return mean_val/2
 
-
-
-
-
-def text_box2(img, x0, y0, x1, y1, msg, initial_scale, font, wh_scale, fill= None, spacing= 0, align_x= "center", align_y= "center"):
-    #write a single line in a text box
-    #center uses median value
-    #return final coordinates of text on image
-    if msg:
-        max_width= x1- x0
-        max_height= y1- y0
-
-        scale_adjust= 0
-
-        temperature_font= temperature_font_loader(int(initial_scale))
-        temperature_w, temperature_h= font.getsize(msg)
-
-        while (temperature_w > max_width ) or ( temperature_h > max_height ) and ((initial_scale+ scale_adjust) > 1):
-
-            scale_adjust-= 1
-            font= temperature_font_loader(int(initial_scale+ scale_adjust))   #MUST CHANGE THIS
-            new_w, new_h= temperature_font.getsize(msg)
-            if (new_w, new_h) == (temperature_w, temperature_h):
-                break
-            else:
-                temperature_w, temperature_h= temperature_font.getsize(msg)
-
-        temperature_x= 0
-        temperature_y= int((max_height- temperature_h)/ 2)
-
-        #yellow
-        bg= Image.new("RGBA", img.size, color= (255, 255, 0, 0))
-        draw= ImageDraw.Draw(bg)
-        draw.text((temperature_x, temperature_y), msg, fill= (255, 255, 0, 255), font= font)
-
-        #update with median 
-        print (x0,x1)
-        temperature_x= ((x1-x0)/2)-(temperature_w/ 2.0)#int((x0+ mean_x(bg)- temperature_w/ 2.0))
-        #temperature_x= mean_x(bg)- (temperature_w/ 2.0)
-
-        print ('temperature_x', temperature_x)
-        bg= Image.new("RGBA", img.size, color= (255, 255, 0, 0))
-        draw= ImageDraw.Draw(bg)
-        draw.text((temperature_x, temperature_y), msg, fill= (255, 255, 0, 255), font= font)        
-        
-        strongshadow= bg.filter(ImageFilter.GaussianBlur(25* wh_scale))
-
-        softshadow= bg.filter(ImageFilter.GaussianBlur(50* wh_scale))
-        img.paste("white", mask= softshadow)
-        img.convert("RGB")
-        img.paste("white", mask= strongshadow)  
-        img.convert("RGB")
-        img.paste(bg, mask= bg)
-        img.convert("RGB")
-
-        return temperature_x, temperature_y, temperature_x+ temperature_w, temperature_y+ temperature_h
 
 
 def setup_canvas(width, height, forecast_background, bg_file, bg_map, zoom, lon, lat, verbose):
@@ -728,7 +629,7 @@ def main(forecast_elements,
     verbose, 
     width=None, height=None):
 
-    import os, math
+    import math
 
     # create display image
     # Set up the correct display and scaling factors
@@ -741,8 +642,8 @@ def main(forecast_elements,
 
     #geometric mean of width and height
     wh_scale= float(math.sqrt((width*width)+(height*height))  /  math.sqrt((300*300)+(200*200)))
-    w_scale= float(width / 300)
-    h_scale= float(height / 200)
+    #w_scale= width / 300.0
+    h_scale= height / 200.0
     #print (width, height, wh_scale, w_scale, h_scale)
     img= setup_canvas(width, height, forecast_elements["forecast_background"], bg_file, bg_map, zoom, lon, lat, verbose)
 
@@ -762,24 +663,28 @@ def main(forecast_elements,
     top_line= 0
     # banner
     if banner:
-        img= write_in_box(img, 0, 0, width, 40* wh_scale, banner, 20* wh_scale, summary_font_loader(20* wh_scale), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
-        top_line+= 25* wh_scale
+        banner_height= .2* height
+        img, bx, by, br, bt= write_in_box(img, 0, 0, width, banner_height, banner, 40* wh_scale, summary_font_loader(40* wh_scale), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
+        top_line+= bt-by
     # location_banner
     if location_banner:
-        img= write_in_box(img, 0, top_line, width, 40* wh_scale+ top_line, location_banner, 20* wh_scale, summary_font_loader(2* wh_scale0), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
-        top_line+= 25* wh_scale
+        banner_height= .2* height
+        img, bx, by, br, bt= write_in_box(img, 0, top_line, width, banner_height+ top_line, location_banner, 20* wh_scale, summary_font_loader(20* wh_scale), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
+        top_line+= bt-by
 
     # forecast time
-    img= write_in_box(img, 0, top_line, width, 40* wh_scale+ top_line, forecast_elements["local_now"], 20* wh_scale, summary_font_loader(20* wh_scale), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
+    img, bx, by, br, bt= write_in_box(img, 0, top_line, width, 60* wh_scale+ top_line, forecast_elements["local_now"], 40* wh_scale, 
+                      summary_font_loader(40* wh_scale), 
+                      fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
+    top_line+= by
 
     #current temperature
-    x0, y0, x1, y1= text_box2(img, 0, 0, width, height- 90* h_scale, forecast_elements["temperature_msg"], int(110* wh_scale), temperature_font_loader(int(110* wh_scale)), wh_scale,
+    img, bx, by, br, bt= write_in_box(img, 0, 0, width, bt, forecast_elements["temperature_msg"], 30* wh_scale, 
+        summary_font_loader(90* wh_scale),
         fill= (255, 255, 0, 255), spacing= 0, align_x= "center", align_y= "center")
 
 
-    temperature_y= (y1- y0)/ 2
-
-
+    temperature_y= by
 
 
 
@@ -822,7 +727,7 @@ def main(forecast_elements,
         fill= (255, 255, 255, 255)
         shadowfill= (0, 0, 0)  
 
-    draw.multiline_text((summary_x, summary_y), reflowed, fill= fill, font= summary_font, align= "left")
+    draw.multiline_text((summary_x, summary_y), reflowed, fill, font= summary_font, align= "left")
     
     strongshadow= bg.filter(ImageFilter.GaussianBlur(25* wh_scale))
 
@@ -872,7 +777,7 @@ def main(forecast_elements,
         else:
             fill= (255, 255, 255, 255)
             shadowfill= (0, 0, 0)               
-        draw.multiline_text((summary_x, summary_y), reflowed, fill= fill, font= summary_font, align= "right")
+        draw.multiline_text((summary_x, summary_y), reflowed, fill, font= summary_font, align= "right")
 
         strongshadow= bg.filter(ImageFilter.GaussianBlur(25* wh_scale))
         softshadow= bg.filter(ImageFilter.GaussianBlur(50* wh_scale))
@@ -898,7 +803,6 @@ def main(forecast_elements,
         x0= int(width/ 24* i)
         x1= int(width/ 24* (i+ 1))
         pcolor= int(forecast_elements["probOfPrecipitation"][i]* 255* .5) #.5 is a fade factor - don't want bars too strong
-        tcolor= 0                
         if p:
             #rain_indicator
             draw.rectangle((x0, y1- 16- 1, x1- 1, y1- 16- 3), fill= (0, 0, 0, p))
@@ -940,9 +844,31 @@ def main(forecast_elements,
 
     # Display the completed canvas on Inky wHAT
     if show_on_inky:
-        from inky import InkyWHAT
+        try:
+            from inky import InkyWHAT
+        except Exception as e:
+            print ('You need to install, connect and test your Inky wHAT.')
+            print ('https://github.com/pimoroni/inky')
+            raise Exception
+        
         inky_display= InkyWHAT(inky_colour)
-
         inky_display.set_image(img)
         #To Show upside down inky_display.set_image(img.rotate(180))      
         inky_display.show()
+
+if __name__=="__main__":
+    #testing
+    main(forecast_elements, 
+    api.lat, 
+    api.lon, 
+    None,
+    False, 
+    False,
+    False, 
+    None,
+    False, 
+    None,
+    'banner',
+    'location banner',
+    True,
+    300, 200)

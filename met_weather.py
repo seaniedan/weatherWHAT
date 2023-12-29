@@ -19,12 +19,17 @@ import api
 import datetime    
 from dateutil import tz
 
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning) 
+
+
 def get_now(lon, lat):
     now= datetime.datetime.now().astimezone(datetime.timezone.utc)
-    print ("Time now:", now)
+    print ("Time now (UTC):", now)
     local_timezone_name= get_local_timezone_name(lon, lat)
     local_now= convert_utc_to_local(now, local_timezone_name)
     print (f"Now as {local_timezone_name}: {local_now}")
+    print (2222)
     return now, local_timezone_name, local_now
 
 
@@ -68,24 +73,25 @@ def get_next_sunrise_or_sunset_msg(now, lon, lat, local_timezone_name):
     import suncalc
     import datetime
 
-    try:
 
-        suncalc_times= suncalc.get_times(now, lon, lat)
-        sunrise= suncalc_times['sunrise']
-        sunrise_utc= datetime.datetime.fromtimestamp(sunrise.replace(tzinfo=datetime.timezone.utc).timestamp(), tz=datetime.timezone.utc)
-        sunset= suncalc_times['sunset']
-        sunset_utc= datetime.datetime.fromtimestamp(sunset.replace(tzinfo=datetime.timezone.utc).timestamp(), tz=datetime.timezone.utc)
 
-        if (sunrise_utc < now < sunset_utc):
-            #it's day time            
-            next_sunrise_or_sunset_msg= "sunset\n{}".format(convert_utc_to_local(sunset_utc, local_timezone_name).strftime("%H:%M"))
+    suncalc_times= suncalc.get_times(now, lon, lat)
+    print (333)
+    sunrise= suncalc_times['sunrise']
+    print (4)
+    sunrise_utc= datetime.datetime.fromtimestamp(sunrise.replace(tzinfo=datetime.timezone.utc).timestamp(), tz=datetime.timezone.utc)
+    print (5)
+    sunset= suncalc_times['sunset']
+    sunset_utc= datetime.datetime.fromtimestamp(sunset.replace(tzinfo=datetime.timezone.utc).timestamp(), tz=datetime.timezone.utc)
 
-        else:
-            # night time
-            next_sunrise_or_sunset_msg= "sunrise\n{}".format(convert_utc_to_local(sunrise_utc, local_timezone_name).strftime("%H:%M"))
-    except AttributeError:
-        #We're at the North pole and there's no sunset
-        next_sunrise_or_sunset_msg= ""
+    if (sunrise_utc < now < sunset_utc):
+        #it's day time            
+        next_sunrise_or_sunset_msg= "sunset\n{}".format(convert_utc_to_local(sunset_utc, local_timezone_name).strftime("%H:%M"))
+
+    else:
+        # night time
+        next_sunrise_or_sunset_msg= "sunrise\n{}".format(convert_utc_to_local(sunrise_utc, local_timezone_name).strftime("%H:%M"))
+
 
 
     return next_sunrise_or_sunset_msg
@@ -220,7 +226,7 @@ def get_high_low_msg(timeSeries, now, local_timezone_name):
         high_low_msg= "low {}°\n{}".format(str(round(low['screenTemperature'])), convert_utc_to_local(convert_from_iso(low['time']), local_timezone_name).strftime("%H:%M"))
     else:
         # high is next 
-        print ('ekse', now)
+        print ('high is next', now)
         high_low_msg= "high {}°\n{}".format(str(round(high['screenTemperature'])), convert_utc_to_local(convert_from_iso(high['time']), local_timezone_name).strftime("%H:%M")) 
 
     return high_low_msg
@@ -242,7 +248,7 @@ if __name__=="__main__":
     #exit()
     now, local_timezone_name, local_now= get_now(api.lon, api.lat)
 
-
+    print (111)
     # sunrise/sunset time
     print (get_next_sunrise_or_sunset_msg(now, api.lon, api.lat, local_timezone_name))
 
