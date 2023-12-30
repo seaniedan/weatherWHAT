@@ -16,8 +16,12 @@
 # support: https://groups.google.com/g/metoffice-datapoint
 
 import api
-import datetime    
+import datetime
 from dateutil import tz
+
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+
 
 def get_now(lon, lat):
     now= datetime.datetime.now().astimezone(datetime.timezone.utc)
@@ -38,7 +42,7 @@ def get_local_timezone_name(lon, lat):
 
 
 def convert_from_iso(date_string):
-    # input time (date_string): 2022-08-01T17:00Z 
+    # input time (date_string): 2022-08-01T17:00Z
     # outputs timezone-aware datetime object, in UTC
     import datetime
     return datetime.datetime.fromisoformat(date_string[:-1]).astimezone(datetime.timezone.utc)
@@ -46,7 +50,7 @@ def convert_from_iso(date_string):
 
 
 def convert_utc_to_local(datetime_object, local_timezone_name):
-    # given a datetime object as UTC 
+    # given a datetime object as UTC
     # and a local timezone name, e.g. 'Europe/Berlin'
     # return local time
 
@@ -75,7 +79,7 @@ def get_next_sunrise_or_sunset_msg(now, lon, lat, local_timezone_name):
         sunset_utc= datetime.datetime.fromtimestamp(sunset.replace(tzinfo=datetime.timezone.utc).timestamp(), tz=datetime.timezone.utc)
 
         if (sunrise_utc < now < sunset_utc):
-            #it's day time            
+            #it's day time
             next_sunrise_or_sunset_msg= "sunset\n{}".format(convert_utc_to_local(sunset_utc, local_timezone_name).strftime("%H:%M"))
 
         else:
@@ -94,6 +98,10 @@ def get_forecast(lon, lat):
 
     import http.client
     import json
+    import time
+
+    max_retries=4
+    retry_delay_seconds=180
 
     #request
     conn = http.client.HTTPSConnection("api-metoffice.apiconnect.ibmcloud.com")
@@ -104,17 +112,19 @@ def get_forecast(lon, lat):
         'accept': "application/json"
         }
 
-    #conn.request("GET", f"/v0/forecasts/point/daily?excludeParameterMetadata=REPLACE_THIS_VALUE&includeLocationName=REPLACE_THIS_VALUE&latitude={lat}&longitude={lon}", headers=headers)
-    conn.request("GET", f"/v0/forecasts/point/hourly?excludeParameterMetadata=REPLACE_THIS_VALUE&includeLocationName=true&latitude={lat}&longitude={lon}", headers=headers)
-    res = conn.getresponse()
-    data = res.read()
+    for retry in range(max_retries):
+        try:
+            conn.request("GET", f"/v0/forecasts/point/hourly?excludeParameterMetadata=REPLACE_THIS_VALUE&includeLocationName=true&latitude={lat}&longitude={lon}", headers=headers)
+            res = conn.getresponse()
+            data = res.read()
+            return json.loads(data)
 
-    #print(data.decode("utf-8"))
-    ##################
-    #decode json
+        except http.client.RemoteDisconnected:
+            time.sleep(retry_delay_seconds)
+    else:
+        # If all retries fail, raise an error or handle it accordingly
+        raise Exception(f"Failed to establish a connection after {max_retries} retries.")
 
-
-    return json.loads(data)
 
 
 
@@ -122,10 +132,6 @@ def get_daily_forecast(lon, lat):
 
     import http.client
     import json
-    
-    #parameters
-    #print (lon)
-    #print (lat)
 
     #request
     conn = http.client.HTTPSConnection("api-metoffice.apiconnect.ibmcloud.com")
@@ -137,14 +143,8 @@ def get_daily_forecast(lon, lat):
         }
 
     conn.request("GET", f"/v0/forecasts/point/daily?excludeParameterMetadata=REPLACE_THIS_VALUE&includeLocationName=REPLACE_THIS_VALUE&latitude={lat}&longitude={lon}", headers=headers)
-    #conn.request("GET", f"/v0/forecasts/point/hourly?excludeParameterMetadata=REPLACE_THIS_VALUE&includeLocationName=true&latitude={lat}&longitude={lon}", headers=headers)
     res = conn.getresponse()
     data = res.read()
-
-    #print(data.decode("utf-8"))
-    ##################
-    #decode json
-
 
     return json.loads(data)
 
