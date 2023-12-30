@@ -704,8 +704,6 @@ def setup_canvas(w,h, forecast_background, bg_file, bg_map, zoom, lon, lat):
             img= resize_fill(img, w, h) 
 
 
-
-
         elif bg_map:
             #load map image
             img= load_map(lat, lon)   
@@ -781,21 +779,24 @@ def main(forecast_elements,
     # messages at top of screen: banner, location_banner, forecast time
 
     top_line= 0
+
     # banner
     if banner:
         img= write_in_box(img, 0, 0, w, 40, banner, 20, summary_font_loader(20), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
         top_line+= 25
+
     # location_banner
     if location_banner:
         img= write_in_box(img, 0, top_line, w, 40+top_line, location_banner, 20, summary_font_loader(20), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
         top_line+= 25
 
     # forecast time
-    img= write_in_box(img, 0, top_line, w, 40+ top_line, forecast_elements["local_now"], 20, summary_font_loader(20), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
+    img= write_in_box(img, 0, top_line, w, 40+ top_line, forecast_elements["local_now"], 70-top_line, summary_font_loader(70-top_line), fill= (0, 0, 0, 255), spacing= 0, align_x= "center", align_y= "top")
 
 
     
-    
+    # temperature in centre of screen
+
     #current temperature
     x0, y0, x1, y1= text_box2(img, 0, 0, w, h- 90, forecast_elements["temperature_msg"], int(110), temperature_font_loader(int(110)), 
         fill= (255, 255, 0, 255), spacing= 0, align_x= "center", align_y= "center")
