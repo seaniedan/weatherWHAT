@@ -939,7 +939,7 @@ def main(forecast_elements,
         tcolor= 0                
         if p:
             #rain_indicator
-            draw.rectangle((x0, y1- 16- 1, x1- 1, y1- 16- 3), fill= (0, 0, 0, p))
+            draw.rectangle((x0, y1- 16- 3, x1- 1, y1- 16- 1), fill= (0, 0, 0, p))
             #rain bars
             draw.rectangle((x0, clamp(y0, y1- (forecast_elements["precipitationRate"][i]/ 2* (y1- y0)), y1- 16), x1- 1, y1- 16), fill= (0, 0, 0, pcolor), outline= (0, 0, 0, 255))
         
@@ -957,8 +957,8 @@ def main(forecast_elements,
                 uv= int(255* .075)
             else:
                 uv= (forecast_elements["uvIndex"][i] > 3)* 255
-            draw.rectangle((x0, y1, x1- 1, y1- 16), fill= (255, 255, 255, 255), outline= (0, 0, 0, 255))
-            draw.rectangle((x0, y1, x1- 1, y1- 16), fill= (255, 255, 0, uv), outline= (0, 0, 0, 255))
+            draw.rectangle((x0, y1-16, x1- 1, y1), fill= (255, 255, 255, 255), outline= (0, 0, 0, 255))
+            draw.rectangle((x0, y1-16, x1- 1, y1), fill= (255, 255, 0, uv), outline= (0, 0, 0, 255))
 
         draw.text((x0+ 2, y0- 16+ y1), hour, fill= (0, 0, 0, 255), font= font, align= 'center') #added a plus one to look better lined up
         
