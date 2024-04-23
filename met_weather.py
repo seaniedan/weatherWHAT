@@ -16,6 +16,10 @@
 # support: https://groups.google.com/g/metoffice-datapoint
 
 import api
+import ss_download
+    # from https://raw.githubusercontent.com/MetOffice/weather_datahub_utilities/main/site_specific_download/ss_download.py
+    # i replaced print(req.text)
+    # with return (req.json())
 import datetime
 from dateutil import tz
 
@@ -93,60 +97,6 @@ def get_next_sunrise_or_sunset_msg(now, lon, lat, local_timezone_name):
     return next_sunrise_or_sunset_msg
 
 
-
-def get_forecast(lon, lat):
-
-    import http.client
-    import json
-    import time
-
-    max_retries=4
-    retry_delay_seconds=180
-
-    #request
-    conn = http.client.HTTPSConnection("api-metoffice.apiconnect.ibmcloud.com")
-
-    headers = {
-        'X-IBM-Client-Id': api.clientId,
-        'X-IBM-Client-Secret': api.clientSecret,
-        'accept': "application/json"
-        }
-
-    for retry in range(max_retries):
-        try:
-            conn.request("GET", f"/v0/forecasts/point/hourly?excludeParameterMetadata=REPLACE_THIS_VALUE&includeLocationName=true&latitude={lat}&longitude={lon}", headers=headers)
-            res = conn.getresponse()
-            data = res.read()
-            return json.loads(data)
-
-        except http.client.RemoteDisconnected:
-            time.sleep(retry_delay_seconds)
-    else:
-        # If all retries fail, raise an error or handle it accordingly
-        raise Exception(f"Failed to establish a connection after {max_retries} retries.")
-
-
-
-
-def get_daily_forecast(lon, lat):
-
-    import http.client
-    import json
-
-    #request
-    conn = http.client.HTTPSConnection("api-metoffice.apiconnect.ibmcloud.com")
-
-    headers = {
-        'X-IBM-Client-Id': api.clientId,
-        'X-IBM-Client-Secret': api.clientSecret,
-        'accept': "application/json"
-        }
-
-    conn.request("GET", f"/v0/forecasts/point/daily?excludeParameterMetadata=REPLACE_THIS_VALUE&includeLocationName=REPLACE_THIS_VALUE&latitude={lat}&longitude={lon}", headers=headers)
-    res = conn.getresponse()
-    data = res.read()
-
-    return json.loads(data)
 
 
 
@@ -244,7 +194,7 @@ if __name__=="__main__":
     print (get_next_sunrise_or_sunset_msg(now, api.lon, api.lat, local_timezone_name))
 
     # hourly forecast
-    forecast= get_forecast(api.lon, api.lat)
+    forecast = ss_download.retrieve_forecast(ss_download.base_url, "hourly", {"apikey": api.key}, api.lat, api.lon, "FALSE", "TRUE")
     #print (forecast)
 
     #daily= get_daily_forecast(lon, lat)
