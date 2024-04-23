@@ -13,7 +13,7 @@
 
 
 import argparse        
-
+import ss_download
 try:
     import api
 except:
@@ -99,7 +99,8 @@ def display_weather(
     else:
         # get current forecast
         now, local_timezone_name, local_now= met_weather.get_now(lon, lat)
-        forecast= met_weather.get_forecast(lon, lat)
+        #forecast= met_weather.get_forecast(lon, lat)
+        forecast = ss_download.retrieve_forecast(ss_download.base_url, "hourly", {"apikey": api.key}, api.lat, api.lon, "FALSE", "TRUE")
 
     if saveforecast:
         #save weather and reload it to check

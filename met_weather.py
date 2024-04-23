@@ -16,6 +16,9 @@
 # support: https://groups.google.com/g/metoffice-datapoint
 
 import api
+import ss_download
+    # i replaced print(req.text)
+    # with return (req.json())
 import datetime    
 from dateutil import tz
 
@@ -29,7 +32,6 @@ def get_now(lon, lat):
     local_timezone_name= get_local_timezone_name(lon, lat)
     local_now= convert_utc_to_local(now, local_timezone_name)
     print (f"Now as {local_timezone_name}: {local_now}")
-    print (2222)
     return now, local_timezone_name, local_now
 
 
@@ -73,14 +75,9 @@ def get_next_sunrise_or_sunset_msg(now, lon, lat, local_timezone_name):
     import suncalc
     import datetime
 
-
-
     suncalc_times= suncalc.get_times(now, lon, lat)
-    print (333)
     sunrise= suncalc_times['sunrise']
-    print (4)
     sunrise_utc= datetime.datetime.fromtimestamp(sunrise.replace(tzinfo=datetime.timezone.utc).timestamp(), tz=datetime.timezone.utc)
-    print (5)
     sunset= suncalc_times['sunset']
     sunset_utc= datetime.datetime.fromtimestamp(sunset.replace(tzinfo=datetime.timezone.utc).timestamp(), tz=datetime.timezone.utc)
 
@@ -92,14 +89,11 @@ def get_next_sunrise_or_sunset_msg(now, lon, lat, local_timezone_name):
         # night time
         next_sunrise_or_sunset_msg= "sunrise\n{}".format(convert_utc_to_local(sunrise_utc, local_timezone_name).strftime("%H:%M"))
 
-
-
     return next_sunrise_or_sunset_msg
 
 
 
 def get_forecast(lon, lat):
-
     import http.client
     import json
 
@@ -117,7 +111,7 @@ def get_forecast(lon, lat):
     res = conn.getresponse()
     data = res.read()
 
-    #print(data.decode("utf-8"))
+
     ##################
     #decode json
 
@@ -145,13 +139,8 @@ def get_daily_forecast(lon, lat):
         }
 
     conn.request("GET", f"/v0/forecasts/point/daily?excludeParameterMetadata=REPLACE_THIS_VALUE&includeLocationName=REPLACE_THIS_VALUE&latitude={lat}&longitude={lon}", headers=headers)
-    #conn.request("GET", f"/v0/forecasts/point/hourly?excludeParameterMetadata=REPLACE_THIS_VALUE&includeLocationName=true&latitude={lat}&longitude={lon}", headers=headers)
     res = conn.getresponse()
     data = res.read()
-
-    #print(data.decode("utf-8"))
-    ##################
-    #decode json
 
 
     return json.loads(data)
@@ -248,17 +237,16 @@ if __name__=="__main__":
     #exit()
     now, local_timezone_name, local_now= get_now(api.lon, api.lat)
 
-    print (111)
     # sunrise/sunset time
     print (get_next_sunrise_or_sunset_msg(now, api.lon, api.lat, local_timezone_name))
 
     # hourly forecast
-    forecast= get_forecast(api.lon, api.lat)
-    #print (forecast)
+    #forecast= get_forecast(api.lon, api.lat)
+    forecast = ss_download.retrieve_forecast(ss_download.base_url, "hourly", {"apikey": api.key}, api.lat, api.lon, "FALSE", "TRUE")
 
-    #daily= get_daily_forecast(lon, lat)
-    #print (daily)
-
+    #try:
+    print ("forecast")
+    print (forecast)
     features= forecast['features']
     timeSeries= features[0]['properties']['timeSeries']
     idx= get_current_timestamp_index(forecast, now)
@@ -301,3 +289,6 @@ if __name__=="__main__":
     probOfPrecipitation= [t['probOfPrecipitation']/100.0 for t in timeSeries[idx:][:24]]
     print ("probOfPrecipitation:")
     print(probOfPrecipitation)
+    #except Exception as e:
+    #print (e)
+    #print(forecast)
