@@ -45,22 +45,36 @@ def load_forecast(loadforecastfile):
 
 
 def save_forecast(forecast, now, local_timezone_name, local_now, saveforecast):
-    #save forecast data as a pickle file
-    #input a dir or filepath
-    #return pickled then unpickled object
+    # save forecast data as a pickle file
+    # input: a directory or a full filepath
+    # returns: the unpickled object after writing
 
     import os
     import pickle
 
-    if os.path.isdir(saveforecast):
-        #create a filename      
-        saveforecastfile= os.path.join(saveforecast, now.strftime("%Y_%m_%d__%H_%M") + '.pickle')
-        #print ('saved filename', saveforecastfile)
-    else:
-        saveforecastfile= saveforecast
+    # Recognised file extensions for pickle files
+    pickle_exts = (".pickle", ".pk", ".pkl")
 
-    pickle.dump((forecast, now, local_timezone_name, local_now), open(saveforecastfile, "wb"))
-    return pickle.load(open(saveforecastfile, "rb"))
+    # Decide if `saveforecast` is a directory or full file path
+    if saveforecast.lower().endswith(pickle_exts):
+        # Caller passed a complete file path
+        saveforecastfile = saveforecast
+    else:
+        # Treat as a directory (even if it does not exist yet)
+        directory = saveforecast
+        filename = now.strftime("%Y_%m_%d__%H_%M") + ".pickle"
+        saveforecastfile = os.path.join(directory, filename)
+
+    # Ensure parent directory exists
+    os.makedirs(os.path.dirname(saveforecastfile), exist_ok=True)
+
+    # Write file
+    with open(saveforecastfile, "wb") as f:
+        pickle.dump((forecast, now, local_timezone_name, local_now), f)
+
+    # Read back and return
+    with open(saveforecastfile, "rb") as f:
+        return pickle.load(f)
 
 
 #run on command line:
