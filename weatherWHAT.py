@@ -128,7 +128,7 @@ def display_weather(
     else:
         # get current forecast
         now, local_timezone_name, local_now= met_weather.get_now(lon, lat)
-        forecast = ss_download.retrieve_forecast(ss_download.base_url, "hourly", {"apikey": api.key}, api.lat, api.lon, "FALSE", "TRUE")
+        forecast = ss_download.retrieve_forecast(ss_download.base_url, "hourly", {"apikey": api.key}, lat, lon, "FALSE", "TRUE")
 
 
     if saveforecast:
@@ -142,7 +142,7 @@ def display_weather(
     forecast_elements= {'local_now':local_now}
 
     # next sunrise and sunset times
-    forecast_elements['sun_msg']= met_weather.get_next_sunrise_or_sunset_msg(now, api.lon, api.lat, local_timezone_name)
+    forecast_elements['sun_msg']= met_weather.get_next_sunrise_or_sunset_msg(now, lon, lat, local_timezone_name)
 
 
     features= forecast['features']
