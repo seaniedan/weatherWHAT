@@ -4,6 +4,13 @@
 from PIL import Image, ImageFont, ImageDraw, ImageFilter
 
 
+def _sz(font, t):
+    # Pillow 10+ removed FreeTypeFont.getsize(). Emulate its (width, height)
+    # return value using getbbox().
+    l, tp, r, b = font.getbbox(t)
+    return r - l, b - tp
+
+
 def mean_of_area(img, x0, y0, x1, y1):
     #get the mean of an area of a Pillow image. Returns a float.
     mean= 0
@@ -282,7 +289,7 @@ def reflow_summary(summary, width, font):
 
     for i in range(len(words)):
         word= words[i]+ " "
-        word_length= font.getsize(word)[0]
+        word_length= _sz(font, word)[0]
         line_length += word_length
 
         if line_length < width:
@@ -385,7 +392,7 @@ def write_in_box(img, x0, y0, x1, y1, msg, initial_scale, font, fill= None, spac
         reflowed= [msg]
         lines= 1
         
-        p_w, p_h= max((font.getsize(line) for line in reflowed))# Width and height of summary
+        p_w, p_h= max((_sz(font, line) for line in reflowed))# Width and height of summary
         p_h= p_h* (len(reflowed))   # Multiply through by number of lines
    
         reflowed_aspect= (p_w)/ float(p_h)
@@ -394,7 +401,7 @@ def write_in_box(img, x0, y0, x1, y1, msg, initial_scale, font, fill= None, spac
             #reflow text to make the x shorter
             lines+= 1
             reflowed = textwrap.wrap(msg, width= math.ceil(len(msg)* 1.05/ float(lines)))  #fudge because textwrap sometimes gives too many lines here
-            p_w, p_h= max((font.getsize(line) for line in reflowed))# Width and height of summary
+            p_w, p_h= max((_sz(font, line) for line in reflowed))# Width and height of summary
             p_h= p_h* (len(reflowed))   # Multiply through by number of lines    
             reflowed_aspect= (p_w)/ float(p_h)
         else:
@@ -402,7 +409,7 @@ def write_in_box(img, x0, y0, x1, y1, msg, initial_scale, font, fill= None, spac
             if lines > 1:
                 lines-= 1
             reflowed= textwrap.wrap(msg, width= math.ceil(len(msg)/ float(lines)))
-            p_w, p_h= max((font.getsize(line) for line in reflowed))# Width and height of summary
+            p_w, p_h= max((_sz(font, line) for line in reflowed))# Width and height of summary
             p_h= p_h* (len(reflowed))   # Multiply through by number of lines    
             reflowed_aspect= (p_w)/ float(p_h)
 
@@ -412,7 +419,7 @@ def write_in_box(img, x0, y0, x1, y1, msg, initial_scale, font, fill= None, spac
             #scale text to fit
             scale_adjust-= 1
             font= summary_font_loader(int(initial_scale+ scale_adjust))
-            p_w, p_h= max((font.getsize(line) for line in reflowed))# Width and height of summary
+            p_w, p_h= max((_sz(font, line) for line in reflowed))# Width and height of summary
             p_h= p_h* (len(reflowed))   # Multiply through by number of lines
 
         centerline= (max_width- p_w)/ 2.0 #-helf a letter
@@ -463,17 +470,17 @@ def text_box(img, x0, y0, x1, y1, msg, initial_scale, font, fill= None, spacing=
         scale_adjust= 0
 
         temperature_font= temperature_font_loader(int(initial_scale))
-        temperature_w, temperature_h= font.getsize(msg)
+        temperature_w, temperature_h= _sz(font, msg)
 
         while (temperature_w > max_width ) or ( temperature_h > max_height ) and ((initial_scale+ scale_adjust) > 1):
 
             scale_adjust-= 1
             font= temperature_font_loader(int(initial_scale+ scale_adjust))   #MUST CHANGE THIS
-            new_w, new_h= temperature_font.getsize(msg)
+            new_w, new_h= _sz(temperature_font, msg)
             if (new_w, new_h) == (temperature_w, temperature_h):
                 break
             else:
-                temperature_w, temperature_h= temperature_font.getsize(msg)
+                temperature_w, temperature_h= _sz(temperature_font, msg)
 
         temperature_x= int((max_width- temperature_w)/ 2)
         temperature_y= int((max_height- temperature_h)/ 2)#0#+ padding
@@ -607,17 +614,17 @@ def text_box2(img, x0, y0, x1, y1, msg, initial_scale, font, fill= None, spacing
         scale_adjust= 0
 
         temperature_font= temperature_font_loader(int(initial_scale))
-        temperature_w, temperature_h= font.getsize(msg)
+        temperature_w, temperature_h= _sz(font, msg)
 
         while (temperature_w > max_width ) or ( temperature_h > max_height ) and ((initial_scale+ scale_adjust) > 1):
 
             scale_adjust-= 1
             font= temperature_font_loader(int(initial_scale+ scale_adjust))   #MUST CHANGE THIS
-            new_w, new_h= temperature_font.getsize(msg)
+            new_w, new_h= _sz(temperature_font, msg)
             if (new_w, new_h) == (temperature_w, temperature_h):
                 break
             else:
-                temperature_w, temperature_h= temperature_font.getsize(msg)
+                temperature_w, temperature_h= _sz(temperature_font, msg)
 
         temperature_x= 0#int((max_width- temperature_w)/ 2)
         #print ('temperature_x',temperature_x)
@@ -820,7 +827,7 @@ def main(forecast_elements,
     while not below_max_length:
         summary_font= summary_font_loader(font_size* scale_adjust)
         reflowed= reflow_summary(msg, max_width, summary_font)
-        p_w, p_h= summary_font.getsize(reflowed)  # Width and height of summary
+        p_w, p_h= _sz(summary_font, reflowed)  # Width and height of summary
         p_h= p_h* (reflowed.count("\n")+ 1)   # Multiply through by number of lines
 
         if p_h < max_height:
@@ -881,7 +888,7 @@ def main(forecast_elements,
         while not below_max_length:
             summary_font= summary_font_loader(font_size* scale_adjust)
             reflowed= reflow_summary(msg, max_width, summary_font)
-            p_w, p_h= max((summary_font.getsize(line) for line in reflowed.splitlines())) # Width and height of summary
+            p_w, p_h= max((_sz(summary_font, line) for line in reflowed.splitlines())) # Width and height of summary
             p_h= p_h* (reflowed.count("\n")+ 1)   # Multiply through by number of lines
 
             if p_h < max_height:

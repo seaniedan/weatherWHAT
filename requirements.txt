@@ -3,8 +3,9 @@ numpy>=1.16.5
 geopy>=1.20.0
 font_hanken_grotesk>=0.0.2
 font_source_sans_pro>=0.0.1
-Pillow>=7.0.0
-geojson 
-suncalc 
-python-dateutil 
+Pillow>=10
+geojson
+suncalc
+python-dateutil
 timezonefinder
+requests
