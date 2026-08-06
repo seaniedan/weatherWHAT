@@ -351,9 +351,14 @@ if __name__ == "__main__":
     location_banner= ""
 
     if args.latlong:
-        latlong= args.latlong
-        lat, lon= latlong.split(',')
-        if args.verbose: 
+        # parse as floats: the geopy and api.py paths both yield floats, and
+        # downstream (timezonefinder, suncalc, map scaling) needs numbers, not
+        # the strings that split() returns.
+        try:
+            lat, lon= (float(x) for x in args.latlong.split(','))
+        except ValueError:
+            parser.error("Please give --latlong as 'latitude, longitude', e.g. -ll '-55, 55'.")
+        if args.verbose:
             print ('Latitude, Longitude from command arguments:', lat, ",", lon)
     elif args.location:
         from geopy.geocoders import Nominatim
