@@ -145,8 +145,20 @@ def display_weather(
     forecast_elements['sun_msg']= met_weather.get_next_sunrise_or_sunset_msg(now, lon, lat, local_timezone_name)
 
 
-    features= forecast['features']
-    timeSeries= features[0]['properties']['timeSeries']
+    # Guard against a response with no site-specific forecast (e.g. a remote
+    # mid-ocean point, an API error, or a corrupt pickle): fail with a clear
+    # message instead of an IndexError/ValueError deep in parsing.
+    try:
+        features= forecast['features']
+        timeSeries= features[0]['properties']['timeSeries']
+    except (KeyError, IndexError, TypeError):
+        timeSeries= None
+    if not timeSeries:
+        print(f"Sorry, no forecast is available for {lat}, {lon}. Try a location on or nearer land.")
+        if verbose:
+            print("Raw forecast response:", forecast)
+        return
+
     idx= met_weather.get_current_timestamp_index(forecast, now)
 
     # current temperature
