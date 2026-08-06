@@ -46,10 +46,13 @@ def get_local_timezone_name(lon, lat):
 
 
 def convert_from_iso(date_string):
-    # input time (date_string): 2022-08-01T17:00Z
+    # input time (date_string): 2022-08-01T17:00Z (the trailing Z means UTC)
     # outputs timezone-aware datetime object, in UTC
+    # NOTE: use replace(), not astimezone(): the parsed value is naive, and
+    # astimezone() would assume it's in the *runner's* local timezone, shifting
+    # every hour label/time by the machine's UTC offset (e.g. -7h on a PDT host).
     import datetime
-    return datetime.datetime.fromisoformat(date_string[:-1]).astimezone(datetime.timezone.utc)
+    return datetime.datetime.fromisoformat(date_string[:-1]).replace(tzinfo=datetime.timezone.utc)
 
 
 
