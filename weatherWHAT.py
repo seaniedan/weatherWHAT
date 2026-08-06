@@ -36,6 +36,17 @@ def valid_date(s):
         raise argparse.ArgumentTypeError(msg)
 
 
+def valid_size(s):
+    # parse a 'WIDTHxHEIGHT' size string (e.g. '1920x1080') into an (int, int) tuple
+    try:
+        w, h = (int(n) for n in s.lower().replace(" ", "").split("x"))
+        if w <= 0 or h <= 0:
+            raise ValueError
+        return w, h
+    except ValueError:
+        raise argparse.ArgumentTypeError("Please give the size as WIDTHxHEIGHT, e.g. '1920x1080'.")
+
+
 def load_forecast(loadforecastfile):
     #load pickled forecast data
 
@@ -93,7 +104,8 @@ def display_weather(
     old= False,
     banner= '',
     location_banner='',
-    verbose= False):
+    verbose= False,
+    size= None):
 
     # bg_file: image filepath for background. Can be a directory from which a random image is used.
     # bg_map: show location on map
@@ -209,18 +221,19 @@ def display_weather(
 
     if save_image or show_image or show_on_inky:
         import weatherDisplay
-        weatherDisplay.main(forecast_elements, 
-        lat, lon, 
-        bg_file, 
-        bg_map, 
-        zoom, 
-        show_on_inky, 
-        inky_colour, 
-        show_image, 
-        save_image, 
-        banner, 
-        location_banner, 
-        verbose)
+        weatherDisplay.main(forecast_elements,
+        lat, lon,
+        bg_file,
+        bg_map,
+        zoom,
+        show_on_inky,
+        inky_colour,
+        show_image,
+        save_image,
+        banner,
+        location_banner,
+        verbose,
+        size= size)
 
 
 #run on command line:
@@ -303,6 +316,14 @@ if __name__ == "__main__":
         help= 'Save image filepath.',
         required= False)
 
+    #Render size
+    parser.add_argument(
+        '-r', '--size',
+        type= valid_size,
+        default= None,
+        help= "render size as WIDTHxHEIGHT, e.g. '1920x1080'. The 400x300 Inky wHAT layout is scaled to fit. Defaults to the display's native size.",
+        required= False)
+
     #Save pickle of forecast  to this filepath
     parser.add_argument(
         '-sf', '--saveforecast',
@@ -380,4 +401,5 @@ if __name__ == "__main__":
         old= args.old,
         banner= args.banner,
         location_banner= location_banner,
-        verbose= args.verbose)
+        verbose= args.verbose,
+        size= args.size)
