@@ -11,6 +11,22 @@ def _sz(font, t):
     return r - l, b - tp
 
 
+def load_icon(name, px):
+    # load a bundled Meteocons PNG (icons/meteocons/<name>.png) scaled to px square
+    import os
+    path = os.path.join(os.path.dirname(__file__), 'icons', 'meteocons', name + '.png')
+    return Image.open(path).convert("RGBA").resize((px, px), Image.LANCZOS)
+
+
+def mono_icon(icon, rgb):
+    # flatten an icon to a solid black/white silhouette (using its alpha as the
+    # shape) so it matches the monochrome text — colour chosen by the background.
+    alpha= icon.split()[-1]
+    solid= Image.new("RGBA", icon.size, (rgb[0], rgb[1], rgb[2], 255))
+    solid.putalpha(alpha)
+    return solid
+
+
 def mean_of_area(img, x0, y0, x1, y1):
     #get the mean of an area of a Pillow image. Returns a float.
     mean= 0
@@ -504,7 +520,12 @@ def text_box(img, x0, y0, x1, y1, msg, initial_scale, font, fill= None, spacing=
         img.paste(bg, mask= bg)
         img.convert("RGB")
 
-        return temperature_x, temperature_y, temperature_x+ temperature_w, temperature_y+ temperature_h
+        # return the TRUE rendered ink box (accounts for the font's top/bottom
+        # bearings) so callers get the real on-screen top/bottom of the number.
+        # (y1-y0) is unchanged vs the old return, so text-mode callers that use
+        # (y1-y0)/2 are unaffected; icon mode relies on the accurate bottom.
+        ink= draw.textbbox((temperature_x, temperature_y), msg, font= font)
+        return ink[0], ink[1], ink[2], ink[3]
 
 
 
@@ -652,7 +673,12 @@ def text_box2(img, x0, y0, x1, y1, msg, initial_scale, font, fill= None, spacing
         img.paste(bg, mask= bg)
         img.convert("RGB")
 
-        return temperature_x, temperature_y, temperature_x+ temperature_w, temperature_y+ temperature_h
+        # return the TRUE rendered ink box (accounts for the font's top/bottom
+        # bearings) so callers get the real on-screen top/bottom of the number.
+        # (y1-y0) is unchanged vs the old return, so text-mode callers that use
+        # (y1-y0)/2 are unaffected; icon mode relies on the accurate bottom.
+        ink= draw.textbbox((temperature_x, temperature_y), msg, font= font)
+        return ink[0], ink[1], ink[2], ink[3]
 
 
 def setup_canvas(w,h, forecast_background, bg_file, bg_map, zoom, lon, lat):
@@ -751,7 +777,8 @@ def main(forecast_elements,
     banner,
     location_banner,
     verbose,
-    size= None):
+    size= None,
+    symbols= 'text'):
 
 
     import os
@@ -819,6 +846,20 @@ def main(forecast_elements,
     x0, y0, x1, y1= text_box2(img, 0, 0, w, h- 90* s, forecast_elements["temperature_msg"], int(110* s), temperature_font_loader(int(110* s)),
         fill= (255, 255, 0, 255), spacing= 0, align_x= "center", align_y= "center", scale= s)
 
+    # top and bottom of the temperature ink — in icon mode the side blocks are
+    # bottom-aligned to temp_bottom, and the RHS icon is kept below temp_top.
+    temp_top= y0
+    temp_bottom= y1
+
+    # shared vertical geometry for the icon-mode side blocks: both times sit on
+    # temp_bottom; the RHS icon floats up into the gap toward temp_top, and the
+    # LHS top line is raised to that same height so the two blocks look balanced.
+    _tf= summary_font_loader(int(24* s))
+    _th= _sz(_tf, "00:00")[1]
+    icon_gap= 4* s
+    side_time_top= temp_bottom- _th
+    icon_px= int(min(80* s, max(24* s, side_time_top- temp_top- icon_gap)))
+    icon_top= max(int(temp_top), int(side_time_top- icon_gap- icon_px))
 
     temperature_y= (y1- y0)/ 2
 
@@ -827,55 +868,96 @@ def main(forecast_elements,
 
 
     #HI/Lo on LHS MIDDLE
-    padding= 50* s
-    max_width= w- padding
-    max_height= 250* s
-    font_size= 24* s
-    below_max_length= False
-    scale_adjust= 1
-    msg= forecast_elements['hi_lo_msg']
+    temp_indicator= forecast_elements.get('temp_indicator') if symbols == 'icons' else None
 
-    while not below_max_length:
-        summary_font= summary_font_loader(int(font_size* scale_adjust))
-        reflowed= reflow_summary(msg, max_width, summary_font)
-        p_w, p_h= _sz(summary_font, reflowed)  # Width and height of summary
-        p_h= p_h* (reflowed.count("\n")+ 1)   # Multiply through by number of lines
+    if temp_indicator:
+        # icon mode: keep the LHS flush-left (symmetric with the RHS) and show
+        # the hi/lo as text — a ▲/▼ triangle (up = high, down = low) + the
+        # temperature on the top line, the time below on temp_bottom. Plain
+        # black/white by background, same drop-shadow as text mode.
+        tfont= summary_font_loader(int(24* s))
+        high= temp_indicator['event'] == 'high'
+        triangle= "▲" if high else "▼"                # direction shows high vs low
+        line1= triangle+ " "+ temp_indicator['temp']   # e.g. "▲ 21°"
+        time_str= temp_indicator['time']
+        left_x= 5* s
 
-        if p_h < max_height:
-            below_max_length= True              # The summary fits! Break out of the loop.
+        asc, desc= tfont.getmetrics()
+        time_baseline= temp_bottom              # bottom line levelled with temp bottom
+        top_baseline= icon_top+ asc             # top line raised to the RHS icon's top
+        block_top= top_baseline- asc
+
+        # plain black/white, chosen by the background (classic drop-shadow)
+        w1= _sz(tfont, line1)[0]; w2= _sz(tfont, time_str)[0]
+        if mean_of_area(img, left_x, block_top, min(left_x+ max(w1, w2), w- 1), min(temp_bottom, h- 1))> .5* 255:
+            fill= (0, 0, 0, 255); shadowfill= (255, 255, 255)
         else:
-            # scale down text to fit
-            scale_adjust*= .95
+            fill= (255, 255, 255, 255); shadowfill= (0, 0, 0)
 
-    # x- and y-coordinates for the top left of the summary
-    summary_x= 5* s   #do i need to check for the longest linw and get size of that?
-    summary_y= temperature_y+ 48* s
+        bg= Image.new("RGBA", img.size, color= (0, 0, 0, 0))
+        draw= ImageDraw.Draw(bg)
+        draw.text((left_x, top_baseline), line1, fill= fill, font= tfont, anchor= "ls")
+        draw.text((left_x, time_baseline), time_str, fill= fill, font= tfont, anchor= "ls")
 
-    #draw it now
-    bg= Image.new("RGBA", img.size, color= (0, 0, 0, 0))
+        strongshadow= bg.filter(ImageFilter.GaussianBlur(25* s))
+        softshadow= bg.filter(ImageFilter.GaussianBlur(50* s))
+        img.paste(shadowfill, mask= softshadow)
+        img.convert("RGB")
+        img.paste(shadowfill, mask= strongshadow)
+        img.convert("RGB")
+        img.paste(bg, mask= bg)
+        img.convert("RGB")
 
-
-    draw= ImageDraw.Draw(bg)
-
-    if mean_of_area(img, summary_x, summary_y, summary_x+ p_w, summary_y+ p_h) > .5* 255:
-        #area is white, use black text and white shadow
-        fill= (0, 0, 0, 255)
-        shadowfill= (255, 255, 255)
     else:
-        fill= (255, 255, 255, 255)
-        shadowfill= (0, 0, 0)  
+        padding= 50* s
+        max_width= w- padding
+        max_height= 250* s
+        font_size= 24* s
+        below_max_length= False
+        scale_adjust= 1
+        msg= forecast_elements['hi_lo_msg']
 
-    draw.multiline_text((summary_x, summary_y), reflowed, fill= fill, font= summary_font, align= "left")
+        while not below_max_length:
+            summary_font= summary_font_loader(int(font_size* scale_adjust))
+            reflowed= reflow_summary(msg, max_width, summary_font)
+            p_w, p_h= _sz(summary_font, reflowed)  # Width and height of summary
+            p_h= p_h* (reflowed.count("\n")+ 1)   # Multiply through by number of lines
 
-    strongshadow= bg.filter(ImageFilter.GaussianBlur(25* s))
+            if p_h < max_height:
+                below_max_length= True              # The summary fits! Break out of the loop.
+            else:
+                # scale down text to fit
+                scale_adjust*= .95
 
-    softshadow= bg.filter(ImageFilter.GaussianBlur(50* s))
-    img.paste(shadowfill, mask= softshadow)
-    img.convert("RGB")
-    img.paste(shadowfill, mask= strongshadow)
-    img.convert("RGB")
-    img.paste(bg, mask= bg)
-    img.convert("RGB")
+        # x- and y-coordinates for the top left of the summary
+        summary_x= 5* s   #do i need to check for the longest linw and get size of that?
+        summary_y= temperature_y+ 48* s
+
+        #draw it now
+        bg= Image.new("RGBA", img.size, color= (0, 0, 0, 0))
+
+
+        draw= ImageDraw.Draw(bg)
+
+        if mean_of_area(img, summary_x, summary_y, summary_x+ p_w, summary_y+ p_h) > .5* 255:
+            #area is white, use black text and white shadow
+            fill= (0, 0, 0, 255)
+            shadowfill= (255, 255, 255)
+        else:
+            fill= (255, 255, 255, 255)
+            shadowfill= (0, 0, 0)
+
+        draw.multiline_text((summary_x, summary_y), reflowed, fill= fill, font= summary_font, align= "left")
+
+        strongshadow= bg.filter(ImageFilter.GaussianBlur(25* s))
+
+        softshadow= bg.filter(ImageFilter.GaussianBlur(50* s))
+        img.paste(shadowfill, mask= softshadow)
+        img.convert("RGB")
+        img.paste(shadowfill, mask= strongshadow)
+        img.convert("RGB")
+        img.paste(bg, mask= bg)
+        img.convert("RGB")
 
 
 
@@ -894,8 +976,50 @@ def main(forecast_elements,
     below_max_length= False
     scale_adjust= 1
     msg= forecast_elements["sun_msg"]
+    sun_indicator= forecast_elements.get('sun_indicator') if symbols == 'icons' else None
 
-    if msg:
+    if sun_indicator:
+        # icon mode: a sun (coming sunrise) or the current moon phase (coming
+        # sunset) above the time, right-aligned on the RHS, with a soft halo so
+        # it stays legible on any background.
+        # Same font/size as the hi/lo block so the two times sit level.
+        time_font= summary_font_loader(int(24* s))
+        t= sun_indicator['time']
+        tw, th= _sz(time_font, t)
+        right= w- 5* s
+
+        # right-align the time and bottom-align its baseline to the temperature
+        # bottom (matches the hi/lo block, so both lower lines are level with it)
+        time_x= int(right- tw)
+        time_baseline= temp_bottom
+        time_top= time_baseline- th
+
+        # icon uses the shared vertical geometry (icon_px, icon_top), centred over
+        # the time — the LHS top line is raised to icon_top so the two balance.
+        icon_y= icon_top
+        icon_x= int(right- tw/ 2- icon_px/ 2)
+
+        # plain black/white, chosen by the background (classic drop-shadow); the
+        # icon is a solid silhouette in the same colour as the text
+        if mean_of_area(img, time_x, time_top, min(time_x+ tw, w- 1), min(time_top+ th, h- 1))> .5* 255:
+            fill= (0, 0, 0, 255); shadowfill= (255, 255, 255)
+        else:
+            fill= (255, 255, 255, 255); shadowfill= (0, 0, 0)
+
+        icon= mono_icon(load_icon(sun_indicator['icon'], icon_px), fill)
+
+        bg= Image.new("RGBA", img.size, color= (0, 0, 0, 0))
+        bg.paste(icon, (icon_x, icon_y), icon)
+        draw= ImageDraw.Draw(bg)
+        draw.text((right, time_baseline), t, fill= fill, font= time_font, anchor= "rs")
+
+        halo= bg.split()[-1].filter(ImageFilter.GaussianBlur(12* s))
+        img.paste(shadowfill, mask= halo)
+        img.convert("RGB")
+        img.paste(bg, mask= bg)
+        img.convert("RGB")
+
+    elif msg:
         while not below_max_length:
             summary_font= summary_font_loader(int(font_size* scale_adjust))
             reflowed= reflow_summary(msg, max_width, summary_font)

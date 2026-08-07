@@ -73,31 +73,62 @@ def convert_utc_to_local(datetime_object, local_timezone_name):
 
 
 
-def get_next_sunrise_or_sunset_msg(now, lon, lat, local_timezone_name):
+def _next_sun_event(now, lon, lat):
+    # Which solar event is next from `now`: returns ('sunrise'|'sunset', event_utc)
+    # or (None, None) at the poles where there may be no sunrise/sunset.
     import suncalc
     import datetime
 
     try:
-
         suncalc_times= suncalc.get_times(now, lon, lat)
         sunrise= suncalc_times['sunrise']
         sunrise_utc= datetime.datetime.fromtimestamp(sunrise.replace(tzinfo=datetime.timezone.utc).timestamp(), tz=datetime.timezone.utc)
         sunset= suncalc_times['sunset']
         sunset_utc= datetime.datetime.fromtimestamp(sunset.replace(tzinfo=datetime.timezone.utc).timestamp(), tz=datetime.timezone.utc)
-
-        if (sunrise_utc < now < sunset_utc):
-            #it's day time
-            next_sunrise_or_sunset_msg= "sunset\n{}".format(convert_utc_to_local(sunset_utc, local_timezone_name).strftime("%H:%M"))
-
-        else:
-            # night time
-            next_sunrise_or_sunset_msg= "sunrise\n{}".format(convert_utc_to_local(sunrise_utc, local_timezone_name).strftime("%H:%M"))
     except AttributeError:
         #We're at the North pole and there's no sunset
-        next_sunrise_or_sunset_msg= ""
+        return None, None
+
+    if (sunrise_utc < now < sunset_utc):
+        return "sunset", sunset_utc      # it's day time; sunset is next
+    else:
+        return "sunrise", sunrise_utc    # night time; sunrise is next
 
 
-    return next_sunrise_or_sunset_msg
+def get_next_sunrise_or_sunset_msg(now, lon, lat, local_timezone_name):
+    # Text form, e.g. "sunset\n21:13". The "sunrise"/"sunset" literals are what
+    # the Coesfeld ansible patch rewrites to arrows, so keep them verbatim.
+    event, event_utc= _next_sun_event(now, lon, lat)
+    if event is None:
+        return ""
+    return "{}\n{}".format(event, convert_utc_to_local(event_utc, local_timezone_name).strftime("%H:%M"))
+
+
+def moon_phase_icon(dt):
+    # Meteocons icon name for the moon phase at `dt` (a tz-aware datetime).
+    # Dependency-free synodic-month calc (this suncalc build has no moon support),
+    # referenced to a known new moon (2000-01-06 18:14 UTC).
+    import datetime
+    icons= ("moon-new-fill", "moon-waxing-crescent-fill", "moon-first-quarter-fill", "moon-waxing-gibbous-fill",
+            "moon-full-fill", "moon-waning-gibbous-fill", "moon-last-quarter-fill", "moon-waning-crescent-fill")
+    ref= datetime.datetime(2000, 1, 6, 18, 14, tzinfo=datetime.timezone.utc)
+    synodic_month= 29.530588853
+    frac= (((dt- ref).total_seconds()/ 86400.0) % synodic_month)/ synodic_month
+    return icons[int(frac* 8+ 0.5) % 8]
+
+
+def get_sun_indicator(now, lon, lat, local_timezone_name):
+    # Structured form for the icon display mode: the next solar event's time plus
+    # the Meteocons icon to show for it — the sun for a coming sunrise, the
+    # current moon phase for a coming sunset. Returns None at the poles.
+    event, event_utc= _next_sun_event(now, lon, lat)
+    if event is None:
+        return None
+    return {
+        "event": event,
+        "time": convert_utc_to_local(event_utc, local_timezone_name).strftime("%H:%M"),
+        "icon": "clear-day-fill" if event == "sunrise" else moon_phase_icon(now),
+    }
 
 
 
@@ -154,25 +185,45 @@ def get_current_timestamp_index(forecast, given_time):
 
 
 
-def get_high_low_msg(timeSeries, now, local_timezone_name):
-    #parse met office JSON file to get highest temperature in next 24 hours
-
+def _next_temp_extreme(timeSeries, now, local_timezone_name):
+    # Which temperature extreme to show next: returns (event, temp_rounded, time_str)
+    # where event is 'high' or 'low'. Earliest low, unless it isn't still ahead.
     high= max(timeSeries, key= lambda time: time['screenTemperature'])
     low= min(timeSeries, key= lambda time: time['screenTemperature'])
 
-    # choose hi/lo: earliest low, unless it's less than an hour away.
     low_time_utc= datetime.datetime.fromtimestamp(convert_from_iso(low['time']).replace(tzinfo= datetime.timezone.utc).timestamp(), tz= datetime.timezone.utc)
-
     high_time_utc= datetime.datetime.fromtimestamp(convert_from_iso(high['time']).replace(tzinfo= datetime.timezone.utc).timestamp(), tz= datetime.timezone.utc)
 
     if (low_time_utc < high_time_utc) and (convert_from_iso(low['time']) > now):
-        # low is next
-        high_low_msg= "low {}°\n{}".format(str(round(low['screenTemperature'])), convert_utc_to_local(convert_from_iso(low['time']), local_timezone_name).strftime("%H:%M"))
+        pick= low
+        event= "low"
     else:
-        # high is next 
-        high_low_msg= "high {}°\n{}".format(str(round(high['screenTemperature'])), convert_utc_to_local(convert_from_iso(high['time']), local_timezone_name).strftime("%H:%M")) 
+        pick= high
+        event= "high"
+    time_str= convert_utc_to_local(convert_from_iso(pick['time']), local_timezone_name).strftime("%H:%M")
+    return event, round(pick['screenTemperature']), time_str
 
-    return high_low_msg
+
+def get_high_low_msg(timeSeries, now, local_timezone_name):
+    #parse met office JSON file to get highest temperature in next 24 hours
+    event, temp, time_str= _next_temp_extreme(timeSeries, now, local_timezone_name)
+    # keep the "low "/"high " literals verbatim — the Coesfeld ansible patch
+    # rewrites them to min/max.
+    if event == "low":
+        return "low {}°\n{}".format(str(temp), time_str)
+    else:
+        return "high {}°\n{}".format(str(temp), time_str)
+
+
+def get_temp_indicator(timeSeries, now, local_timezone_name):
+    # Structured form for icon mode: the next temperature extreme. `event`
+    # ('high'/'low') selects the ▲/▼ triangle drawn alongside the temperature.
+    event, temp, time_str= _next_temp_extreme(timeSeries, now, local_timezone_name)
+    return {
+        "event": event,
+        "temp": str(temp) + "°",
+        "time": time_str,
+    }
 
 
 

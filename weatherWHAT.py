@@ -105,7 +105,8 @@ def display_weather(
     banner= '',
     location_banner='',
     verbose= False,
-    size= None):
+    size= None,
+    symbols= 'text'):
 
     # bg_file: image filepath for background. Can be a directory from which a random image is used.
     # bg_map: show location on map
@@ -144,6 +145,10 @@ def display_weather(
     # next sunrise and sunset times
     forecast_elements['sun_msg']= met_weather.get_next_sunrise_or_sunset_msg(now, lon, lat, local_timezone_name)
 
+    # icon display mode: sun for a coming sunrise, current moon phase for a coming sunset
+    if symbols == 'icons':
+        forecast_elements['sun_indicator']= met_weather.get_sun_indicator(now, lon, lat, local_timezone_name)
+
 
     # Guard against a response with no site-specific forecast (e.g. a remote
     # mid-ocean point, an API error, or a corrupt pickle): fail with a clear
@@ -167,6 +172,8 @@ def display_weather(
 
     # high and low temperatures in the next 24 hours:
     forecast_elements['hi_lo_msg']= met_weather.get_high_low_msg(timeSeries[idx:][:24], now, local_timezone_name)
+    if symbols == 'icons':
+        forecast_elements['temp_indicator']= met_weather.get_temp_indicator(timeSeries[idx:][:24], now, local_timezone_name)
 
     #date
     forecast_elements["local_now"]= local_now.strftime("%A %d %b %Y")
@@ -245,7 +252,8 @@ def display_weather(
         banner,
         location_banner,
         verbose,
-        size= size)
+        size= size,
+        symbols= symbols)
 
 
 #run on command line:
@@ -336,6 +344,15 @@ if __name__ == "__main__":
         help= "render size as WIDTHxHEIGHT, e.g. '1920x1080'. The 400x300 Inky wHAT layout is scaled to fit. Defaults to the display's native size.",
         required= False)
 
+    #Sunrise/sunset symbol style
+    parser.add_argument(
+        '--symbols',
+        type= str,
+        choices= ["text", "icons"],
+        default= "text",
+        help= "how to show the next sunrise/sunset: 'text' (default, the word + time) or 'icons' (a sun for a coming sunrise, the current moon phase for a coming sunset).",
+        required= False)
+
     #Save pickle of forecast  to this filepath
     parser.add_argument(
         '-sf', '--saveforecast',
@@ -419,4 +436,5 @@ if __name__ == "__main__":
         banner= args.banner,
         location_banner= location_banner,
         verbose= args.verbose,
-        size= args.size)
+        size= args.size,
+        symbols= args.symbols)
