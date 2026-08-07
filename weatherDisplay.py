@@ -12,10 +12,18 @@ def _sz(font, t):
 
 
 def load_icon(name, px):
-    # load a bundled Meteocons PNG (icons/meteocons/<name>.png) scaled to px square
+    # load a bundled icon PNG (icons/<subdir>/<name>.png) scaled to `px` TALL,
+    # preserving aspect ratio (square meteocons stay square; the tall thermometers
+    # stay narrow). meteocons = sun/moon phases; gauge = the min/max thermometers.
     import os
-    path = os.path.join(os.path.dirname(__file__), 'icons', 'meteocons', name + '.png')
-    return Image.open(path).convert("RGBA").resize((px, px), Image.LANCZOS)
+    base = os.path.join(os.path.dirname(__file__), 'icons')
+    for sub in ('meteocons', 'gauge'):
+        path = os.path.join(base, sub, name + '.png')
+        if os.path.isfile(path):
+            im = Image.open(path).convert("RGBA")
+            w0, h0 = im.size
+            return im.resize((max(1, round(px * w0 / h0)), px), Image.LANCZOS)
+    raise FileNotFoundError("icon not found: " + name)
 
 
 def mono_icon(icon, rgb):
@@ -871,33 +879,44 @@ def main(forecast_elements,
     temp_indicator= forecast_elements.get('temp_indicator') if symbols == 'icons' else None
 
     if temp_indicator:
-        # icon mode: keep the LHS flush-left (symmetric with the RHS) and show
-        # the hi/lo as text — a ▲/▼ triangle (up = high, down = low) + the
-        # temperature on the top line, the time below on temp_bottom. Plain
-        # black/white by background, same drop-shadow as text mode.
+        # icon mode (Option C): a small thermometer gauge (empty = low, full =
+        # high) with its top aligned to the RHS sun/moon top, the temperature
+        # right beside it, and that [thermometer + temp] group centred above the
+        # time. Plain black/white by background.
         tfont= summary_font_loader(int(24* s))
-        high= temp_indicator['event'] == 'high'
-        triangle= "▲" if high else "▼"                # direction shows high vs low
-        line1= triangle+ " "+ temp_indicator['temp']   # e.g. "▲ 21°"
+        temp_str= temp_indicator['temp']
         time_str= temp_indicator['time']
-        left_x= 5* s
-
         asc, desc= tfont.getmetrics()
-        time_baseline= temp_bottom              # bottom line levelled with temp bottom
-        top_baseline= icon_top+ asc             # top line raised to the RHS icon's top
-        block_top= top_baseline- asc
+
+        therm_px= int(icon_px* 0.8)             # a touch smaller than the sun/moon
+        raw= load_icon(temp_indicator['icon'], therm_px)
+        tw_ic= raw.width
+        gap= int(6* s)
+        tw_temp, th_temp= _sz(tfont, temp_str)
+        tw_time= _sz(tfont, time_str)[0]
+
+        left_x= int(5* s)
+        # nudge down ~2 tick-marks so the thermometer sits level with the sun/moon
+        # art (whose glyph has a little top padding inside its box)
+        therm_top= icon_top+ int(therm_px* 0.12)
+        temp_x= left_x+ tw_ic+ gap
+        temp_baseline= int(therm_top+ therm_px/ 2+ th_temp/ 2)   # temp centred on the thermometer
+        group_w= tw_ic+ gap+ tw_temp
+        time_x= int(left_x+ group_w/ 2- tw_time/ 2)              # time centred under the group
+        time_baseline= temp_bottom
 
         # plain black/white, chosen by the background (classic drop-shadow)
-        w1= _sz(tfont, line1)[0]; w2= _sz(tfont, time_str)[0]
-        if mean_of_area(img, left_x, block_top, min(left_x+ max(w1, w2), w- 1), min(temp_bottom, h- 1))> .5* 255:
+        if mean_of_area(img, left_x, therm_top, int(temp_x+ tw_temp), int(temp_bottom))> .5* 255:
             fill= (0, 0, 0, 255); shadowfill= (255, 255, 255)
         else:
             fill= (255, 255, 255, 255); shadowfill= (0, 0, 0)
 
+        icon= mono_icon(raw, fill)
         bg= Image.new("RGBA", img.size, color= (0, 0, 0, 0))
+        bg.paste(icon, (left_x, therm_top), icon)
         draw= ImageDraw.Draw(bg)
-        draw.text((left_x, top_baseline), line1, fill= fill, font= tfont, anchor= "ls")
-        draw.text((left_x, time_baseline), time_str, fill= fill, font= tfont, anchor= "ls")
+        draw.text((temp_x, temp_baseline), temp_str, fill= fill, font= tfont, anchor= "ls")
+        draw.text((time_x, time_baseline), time_str, fill= fill, font= tfont, anchor= "ls")
 
         strongshadow= bg.filter(ImageFilter.GaussianBlur(25* s))
         softshadow= bg.filter(ImageFilter.GaussianBlur(50* s))

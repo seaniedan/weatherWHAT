@@ -217,12 +217,13 @@ def get_high_low_msg(timeSeries, now, local_timezone_name):
 
 def get_temp_indicator(timeSeries, now, local_timezone_name):
     # Structured form for icon mode: the next temperature extreme. `event`
-    # ('high'/'low') selects the ▲/▼ triangle drawn alongside the temperature.
+    # ('high'/'low') selects the full vs empty thermometer gauge (`icon`).
     event, temp, time_str= _next_temp_extreme(timeSeries, now, local_timezone_name)
     return {
         "event": event,
         "temp": str(temp) + "°",
         "time": time_str,
+        "icon": "thermo-high" if event == "high" else "thermo-low",  # full vs empty gauge
     }
 
 
